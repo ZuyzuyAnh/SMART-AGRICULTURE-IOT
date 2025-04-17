@@ -2,8 +2,11 @@ import * as tf from "@tensorflow/tfjs-node";
 import fs from "fs";
 import path from "path";
 import sharp from "sharp";
+import IMG4Predict from "../models/img4predict.model";
+import Prediction from "../models/prediction.model";
+import mongoose from "mongoose";
 
-const MODEL_PATH = "/media/zuyanh/New Volume/iot-node/tfjs_model";
+const MODEL_PATH = "/home/hungnm/Documents/Projects/SMART-AGRICULTURE-IOT/tfjs_model";
 
 const PLANT_DISEASE_CLASSES = [
   "Pepper_bell_healthy",
@@ -30,7 +33,7 @@ class ImagePredictionService {
 
   constructor() {
     this.model = null;
-    this.labels = null;
+    this.labels = PLANT_DISEASE_CLASSES;
     this.isLoaded = false;
   }
 
@@ -45,6 +48,8 @@ class ImagePredictionService {
         this.labels = JSON.parse(
           fs.readFileSync(path.join(MODEL_PATH, "labels.json"), "utf8")
         );
+      } else {
+        this.labels = PLANT_DISEASE_CLASSES;
       }
 
       this.isLoaded = true;
@@ -78,7 +83,7 @@ class ImagePredictionService {
     }
   }
 
-  async predict(imagePath) {
+  async predict(imagePath: string, imageId?: string) {
     await this.ensureModelLoaded();
 
     try {
@@ -93,19 +98,79 @@ class ImagePredictionService {
       const predictionArray = Array.from(predictionData);
       const maxProbability = Math.max(...predictionArray);
       const classIndex = predictionArray.indexOf(maxProbability);
+      const className = this.labels[classIndex];
 
       const results = {
         prediction: classIndex,
-        className: PLANT_DISEASE_CLASSES[classIndex],
+        className,
+        confidence: maxProbability
       };
 
       tf.dispose(inputTensor);
       tf.dispose(predictions);
 
+      // Nếu có imageId, lưu kết quả dự đoán vào MongoDB
+      if (imageId) {
+        const prediction = new Prediction({
+          disease_name: className,
+          confidence: maxProbability,
+          note: `Predicted with confidence: ${(maxProbability * 100).toFixed(2)}%`,
+          predicted_at: new Date(),
+          created_at: new Date(),
+          IMG4PredictId: new mongoose.Types.ObjectId(imageId)
+        });
+
+        const savedPrediction = await prediction.save();
+        
+        // Thêm ID của dự đoán vào kết quả trả về
+        results['predictionId'] = savedPrediction._id;
+      }
+
       return results;
     } catch (error) {
       console.error("Lỗi khi dự đoán:", error);
       throw new Error("Không thể thực hiện dự đoán");
+    }
+  }
+
+  // Phương thức mới để dự đoán theo ID ảnh
+  async predictById(imageId: string) {
+    try {
+      // Tìm ảnh trong MongoDB
+      const image = await IMG4Predict.findById(imageId);
+      if (!image) {
+        throw new Error('Image not found');
+      }
+
+      // Đường dẫn tuyệt đối đến file ảnh
+      const imagePath = path.join(process.cwd(), image.imgURL.replace(/^\//, ''));
+      
+      if (!fs.existsSync(imagePath)) {
+        throw new Error('Image file not found on server');
+      }
+
+      // Dự đoán và lưu kết quả
+      return await this.predict(imagePath, imageId);
+    } catch (error) {
+      console.error('Error during prediction by ID:', error);
+      throw error;
+    }
+  }
+
+  // Phương thức để lấy kết quả dự đoán theo ID
+  async getPredictionById(predictionId: string) {
+    try {
+      const prediction = await Prediction.findById(predictionId)
+        .populate('IMG4PredictId');
+      
+      if (!prediction) {
+        throw new Error('Prediction not found');
+      }
+      
+      return prediction;
+    } catch (error) {
+      console.error('Error fetching prediction:', error);
+      throw error;
     }
   }
 }

@@ -1,11 +1,23 @@
 import multer from "multer";
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import path from "path";
 import fs from "fs";
 import crypto from "crypto";
 import predictService from "../services/image_predict";
+import IMG4Predict from "../models/img4predict.model";
+import { authenticate } from '../middleware/auth.middleware';
 
 const router = Router();
+
+// Đảm bảo thư mục tồn tại
+const ensureDir = (dirPath: string) => {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+};
+
+ensureDir("temp");
+ensureDir("uploads");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -21,7 +33,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-router.post("/upload/init", (req, res) => {
+router.post("/upload/init", authenticate, (req: Request, res: Response) => {
   const fileId = crypto.randomUUID();
 
   console.log(`File ID: ${fileId}`);
@@ -32,7 +44,7 @@ router.post("/upload/init", (req, res) => {
   });
 });
 
-router.post("/upload/chunk", upload.single("chunk"), (req, res) => {
+router.post("/upload/chunk", authenticate, upload.single("chunk"), (req: Request, res: Response) => {
   const { fileId, chunkId, totalChunks, fileName } = req.body;
 
   console.log("Request body:", req.body);
@@ -79,8 +91,8 @@ router.post("/upload/chunk", upload.single("chunk"), (req, res) => {
   }
 });
 
-router.post("/upload/complete", async (req, res) => {
-  const { fileId, fileName, totalChunks } = req.body;
+router.post("/upload/complete", authenticate, async (req: Request, res: Response) => {
+  const { fileId, fileName, totalChunks, plantId } = req.body;
 
   if (!fileId || !fileName || !totalChunks) {
     res.status(400).json({
@@ -116,8 +128,8 @@ router.post("/upload/complete", async (req, res) => {
       return;
     }
 
-    const file = path.join("uploads", fileName);
-    const writeStream = fs.createWriteStream(file);
+    const uploadPath = path.join("uploads", fileName);
+    const writeStream = fs.createWriteStream(uploadPath);
 
     for (let i = 0; i < totalChunks; i++) {
       const chunkPath = path.join("temp", `${fileId}_${i}`);
@@ -129,17 +141,54 @@ router.post("/upload/complete", async (req, res) => {
 
     writeStream.end();
 
-    const result = await predictService.predict(file);
+    // Lưu thông tin ảnh vào MongoDB
+    const newImage = new IMG4Predict({
+      imgURL: `/uploads/${fileName}`,
+      uploaded_at: new Date(),
+      created_at: new Date(),
+      PlantId: plantId || null
+    });
+
+    const savedImage = await newImage.save();
+
+    // Dự đoán ảnh
+    const result = await predictService.predict(uploadPath, savedImage._id.toString());
 
     res.json({
       success: true,
       result,
-      filePath: file,
+      filePath: uploadPath,
+      image: savedImage
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: error.message,
+    });
+  }
+});
+
+// Thêm endpoint để lấy kết quả dự đoán
+router.get("/predictions/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const prediction = await predictService.getPredictionById(id);
+    
+    if (!prediction) {
+      return res.status(404).json({
+        success: false,
+        message: "Prediction not found"
+      });
+    }
+    
+    res.json({
+      success: true,
+      prediction
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
     });
   }
 });
