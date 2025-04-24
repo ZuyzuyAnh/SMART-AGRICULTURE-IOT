@@ -6,7 +6,7 @@ import IMG4Predict from "../models/img4predict.model";
 import Prediction from "../models/prediction.model";
 import mongoose from "mongoose";
 
-const MODEL_PATH = "/home/hungnm/Documents/Projects/SMART-AGRICULTURE-IOT/tfjs_model";
+const MODEL_PATH = "/home/hungnm/projects/SMART-AGRICULTURE-IOT/tfjs_model";
 
 const PLANT_DISEASE_CLASSES = [
   "Pepper_bell_healthy",
@@ -103,7 +103,7 @@ class ImagePredictionService {
       const results = {
         prediction: classIndex,
         className,
-        confidence: maxProbability
+        confidence: maxProbability,
       };
 
       tf.dispose(inputTensor);
@@ -114,16 +114,18 @@ class ImagePredictionService {
         const prediction = new Prediction({
           disease_name: className,
           confidence: maxProbability,
-          note: `Predicted with confidence: ${(maxProbability * 100).toFixed(2)}%`,
+          note: `Predicted with confidence: ${(maxProbability * 100).toFixed(
+            2
+          )}%`,
           predicted_at: new Date(),
           created_at: new Date(),
-          IMG4PredictId: new mongoose.Types.ObjectId(imageId)
+          IMG4PredictId: new mongoose.Types.ObjectId(imageId),
         });
 
         const savedPrediction = await prediction.save();
-        
+
         // Thêm ID của dự đoán vào kết quả trả về
-        results['predictionId'] = savedPrediction._id;
+        results["predictionId"] = savedPrediction._id;
       }
 
       return results;
@@ -139,20 +141,23 @@ class ImagePredictionService {
       // Tìm ảnh trong MongoDB
       const image = await IMG4Predict.findById(imageId);
       if (!image) {
-        throw new Error('Image not found');
+        throw new Error("Image not found");
       }
 
       // Đường dẫn tuyệt đối đến file ảnh
-      const imagePath = path.join(process.cwd(), image.imgURL.replace(/^\//, ''));
-      
+      const imagePath = path.join(
+        process.cwd(),
+        image.imgURL.replace(/^\//, "")
+      );
+
       if (!fs.existsSync(imagePath)) {
-        throw new Error('Image file not found on server');
+        throw new Error("Image file not found on server");
       }
 
       // Dự đoán và lưu kết quả
       return await this.predict(imagePath, imageId);
     } catch (error) {
-      console.error('Error during prediction by ID:', error);
+      console.error("Error during prediction by ID:", error);
       throw error;
     }
   }
@@ -160,16 +165,17 @@ class ImagePredictionService {
   // Phương thức để lấy kết quả dự đoán theo ID
   async getPredictionById(predictionId: string) {
     try {
-      const prediction = await Prediction.findById(predictionId)
-        .populate('IMG4PredictId');
-      
+      const prediction = await Prediction.findById(predictionId).populate(
+        "IMG4PredictId"
+      );
+
       if (!prediction) {
-        throw new Error('Prediction not found');
+        throw new Error("Prediction not found");
       }
-      
+
       return prediction;
     } catch (error) {
-      console.error('Error fetching prediction:', error);
+      console.error("Error fetching prediction:", error);
       throw error;
     }
   }

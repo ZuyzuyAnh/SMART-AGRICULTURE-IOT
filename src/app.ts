@@ -6,7 +6,9 @@ import path from "path";
 import predictService from "./services/image_predict";
 import fileUploadRouter from "./handler/file_upload";
 import predictRouter from "./handler/predict";
-import authRouter from "./routes/auth.routes"; // Thêm dòng này
+import authRouter from "./routes/auth.routes";
+import seasonRouter from "./routes/season.routes";
+import locationRouter from "./routes/location.routes"; // Thêm dòng này
 import connectDB from "./config/database";
 
 // Load environment variables
@@ -34,7 +36,9 @@ app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 // Routes
 app.use("/", fileUploadRouter);
 app.use("/", predictRouter);
-app.use("/auth", authRouter); // Thêm route auth
+app.use("/auth", authRouter);
+app.use("/api/seasons", seasonRouter);
+app.use("/api/seasons/:seasonId/locations", locationRouter); // Nested route
 
 // Root endpoint
 app.get("/", (req, res) => {
