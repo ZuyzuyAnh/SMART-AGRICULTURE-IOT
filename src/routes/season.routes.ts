@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as seasonController from '../controllers/season.controller';
 import { authenticate } from '../middleware/auth.middleware';
+import * as plantController from '../controllers/plant.controller';
 
 const router = Router();
 
@@ -24,5 +25,8 @@ router.delete('/:seasonId', seasonController.deleteSeason);
 
 // Lấy thống kê về season
 router.get('/:seasonId/stats', seasonController.getSeasonStats);
+
+// Lấy tất cả cây trồng trong season
+router.get('/:seasonId/plants', plantController.getPlantsBySeason);
 
 export default router;

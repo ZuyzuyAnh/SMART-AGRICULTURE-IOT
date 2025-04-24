@@ -6,13 +6,19 @@ import path from "path";
 import predictService from "./services/image_predict";
 import fileUploadRouter from "./handler/file_upload";
 import predictRouter from "./handler/predict";
-import authRouter from "./routes/auth.routes";
+import authRouter from "./routes/auth.routes"; 
 import seasonRouter from "./routes/season.routes";
-import locationRouter from "./routes/location.routes"; // Thêm dòng này
+import locationRouter from "./routes/location.routes";
+import plantRouter from "./routes/plant.routes"; // Thêm dòng này
 import connectDB from "./config/database";
+import sensorRouter from "./routes/sensor.routes"; // Thêm dòng này
+import alertRouter from "./routes/alert.routes"; // Thêm dòng này
+import './services/mqtt.service'; // Đảm bảo service MQTT được khởi động
+import notificationRouter from "./routes/notification.routes"; // Thêm dòng này
+
 
 // Load environment variables
-dotenv.config();
+dotenv.config();  
 
 // Initialize express app
 export const app = express();
@@ -38,7 +44,13 @@ app.use("/", fileUploadRouter);
 app.use("/", predictRouter);
 app.use("/auth", authRouter);
 app.use("/api/seasons", seasonRouter);
-app.use("/api/seasons/:seasonId/locations", locationRouter); // Nested route
+app.use("/api/seasons/:seasonId/locations", locationRouter);
+app.use("/api/seasons/:seasonId/locations/:locationId/plants", plantRouter); // Nested route for plants
+// Thêm routes
+app.use('/api/sensors', sensorRouter);
+app.use('/api/alerts', alertRouter);
+app.use('/api/notifications', notificationRouter);
+
 
 // Root endpoint
 app.get("/", (req, res) => {
