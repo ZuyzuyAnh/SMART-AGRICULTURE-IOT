@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import crypto from "crypto";
 import PasswordReset from "../models/passwordReset.model";
+import mongoose from "mongoose";
 
 dotenv.config();
 
@@ -211,6 +212,71 @@ class AuthService {
 
       return {
         message: "Mật khẩu đã được thay đổi thành công",
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async deleteAccount(userId: string, password: string) {
+    try {
+      // Tìm user
+      const user = await User.findById(userId);
+      if (!user) {
+        throw new Error("Người dùng không tồn tại");
+      }
+
+      // Kiểm tra mật khẩu để xác thực
+      const isMatch = await user.comparePassword(password);
+      if (!isMatch) {
+        throw new Error("Mật khẩu không đúng");
+      }
+
+      // Tìm và xóa tất cả seasons của user
+      const seasons = await mongoose
+        .model("Season")
+        .find({ userId: new mongoose.Types.ObjectId(userId) });
+
+      // Xóa các dữ liệu liên quan đến từng season
+      for (const season of seasons) {
+        // Tìm locations trong season
+        const locations = await mongoose
+          .model("Location")
+          .find({ seasonId: season._id });
+
+        for (const location of locations) {
+          // Xóa plants, sensor data, alert settings, v.v.
+          await mongoose
+            .model("Plant")
+            .deleteMany({ locationId: location._id });
+          await mongoose
+            .model("SensorData")
+            .deleteMany({ locationId: location._id });
+          await mongoose
+            .model("AlertSettings")
+            .deleteMany({ locationId: location._id });
+          await mongoose
+            .model("Notification")
+            .deleteMany({ locationId: location._id });
+        }
+
+        // Xóa locations
+        await mongoose.model("Location").deleteMany({ seasonId: season._id });
+      }
+
+      // Xóa seasons
+      await mongoose
+        .model("Season")
+        .deleteMany({ userId: new mongoose.Types.ObjectId(userId) });
+
+      // Xóa password reset tokens
+      await PasswordReset.deleteMany({ email: user.email });
+
+      // Cuối cùng xóa tài khoản
+      await User.findByIdAndDelete(userId);
+
+      return {
+        message: "Tài khoản đã được xóa thành công",
       };
     } catch (error) {
       throw error;

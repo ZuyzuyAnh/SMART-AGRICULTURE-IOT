@@ -3,11 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-/**
- * Kết nối đến MongoDB Atlas với thông báo lỗi chi tiết hơn.
- */
 const connectDB = async (): Promise<void> => {
-  // Lấy cấu hình từ biến môi trường
   const {
     MONGODB_USERNAME,
     MONGODB_PASSWORD,
@@ -15,7 +11,6 @@ const connectDB = async (): Promise<void> => {
     MONGODB_DB_NAME
   } = process.env;
 
-  // Kiểm tra biến môi trường
   if (!MONGODB_USERNAME) {
     console.error('⚠️  Thiếu biến môi trường: MONGODB_USERNAME');
     process.exit(1);

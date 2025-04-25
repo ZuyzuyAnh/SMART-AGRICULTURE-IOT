@@ -12,7 +12,7 @@ export interface INotification extends Document {
 }
 
 const NotificationSchema: Schema = new Schema({
-  type: { type: String, required: true }, // Loại thông báo (temperature_alert, soil_moisture_alert, etc.)
+  type: { type: String, required: true },
   message: { type: String, required: true }, // Nội dung thông báo
   locationId: { type: Schema.Types.ObjectId, ref: 'Location', required: true },
   sensorDataId: { type: Schema.Types.ObjectId, ref: 'SensorData' }, // Liên kết với dữ liệu cảm biến gây ra cảnh báo

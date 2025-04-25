@@ -7,6 +7,7 @@ export interface ISeason extends Document {
   created_at: Date;
   updated_at: Date;
   userId: mongoose.Types.ObjectId;
+  is_archived: boolean;
 }
 
 const SeasonSchema: Schema = new Schema({
@@ -15,7 +16,13 @@ const SeasonSchema: Schema = new Schema({
   end_date: { type: Date, required: true },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true }
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  status: { 
+    type: String, 
+    enum: ['Đang chuẩn bị', 'Đang diễn ra', 'Đã kết thúc'], 
+    default: 'Đang chuẩn bị' 
+  },
+  is_archived: { type: Boolean, default: false }
 });
 
 export default mongoose.model<ISeason>('Season', SeasonSchema);

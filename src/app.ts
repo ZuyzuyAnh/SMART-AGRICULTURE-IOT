@@ -9,14 +9,18 @@ import predictRouter from "./handler/predict";
 import authRouter from "./routes/auth.routes"; 
 import seasonRouter from "./routes/season.routes";
 import locationRouter from "./routes/location.routes";
-import plantRouter from "./routes/plant.routes"; // Thêm dòng này
+import plantRouter from "./routes/plant.routes"; 
 import connectDB from "./config/database";
-import sensorRouter from "./routes/sensor.routes"; // Thêm dòng này
-import alertRouter from "./routes/alert.routes"; // Thêm dòng này
-import './services/mqtt.service'; // Đảm bảo service MQTT được khởi động
-import notificationRouter from "./routes/notification.routes"; // Thêm dòng này
-import carePlanRouter from "./routes/carePlan.routes"; // Thêm dòng này
+import sensorRouter from "./routes/sensor.routes"; 
+import alertRouter from "./routes/alert.routes";
+import notificationRouter from "./routes/notification.routes";
+import carePlanRouter from "./routes/carePlan.routes"; 
+import seasonHistoryRouter from "./routes/seasonHistory.routes"; 
+import deviceRouter from './routes/device.routes';
 
+
+
+import './services/mqtt.service'; 
 
 // Load environment variables
 dotenv.config();  
@@ -52,6 +56,8 @@ app.use('/api/sensors', sensorRouter);
 app.use('/api/alerts', alertRouter);
 app.use('/api/notifications', notificationRouter);
 app.use('/api/seasons/:seasonId/locations/:locationId/plants/:plantId/care-plan', carePlanRouter);
+app.use('/api/season-histories', seasonHistoryRouter);
+app.use('/api/devices', deviceRouter);
 
 
 

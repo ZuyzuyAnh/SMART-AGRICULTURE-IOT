@@ -170,3 +170,36 @@ export const changePassword = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const deleteAccount = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const { password } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        message: "Vui lòng cung cấp mật khẩu để xác nhận xóa tài khoản",
+      });
+    }
+
+    const result = await authService.deleteAccount(userId, password);
+
+    res.status(200).json({
+      success: true,
+      message: result.message,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error instanceof Error ? error.message : "Lỗi khi xóa tài khoản",
+    });
+  }
+};
