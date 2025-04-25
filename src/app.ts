@@ -15,6 +15,7 @@ import sensorRouter from "./routes/sensor.routes"; // Thêm dòng này
 import alertRouter from "./routes/alert.routes"; // Thêm dòng này
 import './services/mqtt.service'; // Đảm bảo service MQTT được khởi động
 import notificationRouter from "./routes/notification.routes"; // Thêm dòng này
+import carePlanRouter from "./routes/carePlan.routes"; // Thêm dòng này
 
 
 // Load environment variables
@@ -50,6 +51,8 @@ app.use("/api/seasons/:seasonId/locations/:locationId/plants", plantRouter); // 
 app.use('/api/sensors', sensorRouter);
 app.use('/api/alerts', alertRouter);
 app.use('/api/notifications', notificationRouter);
+app.use('/api/seasons/:seasonId/locations/:locationId/plants/:plantId/care-plan', carePlanRouter);
+
 
 
 // Root endpoint
