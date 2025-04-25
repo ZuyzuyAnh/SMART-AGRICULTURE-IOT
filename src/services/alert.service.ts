@@ -3,9 +3,6 @@ import AlertSettings from '../models/alertSetting.model';
 import Notification from '../models/notification.model';
 import mongoose from 'mongoose';
 
-/**
- * Kiểm tra ngưỡng cảnh báo và tạo thông báo nếu cần
- */
 export async function checkAlertThresholds(
   locationId: string,
   sensorType: string,
@@ -79,9 +76,7 @@ export async function checkAlertThresholds(
   }
 }
 
-/**
- * Gửi thông báo cảnh báo đến người dùng
- */
+// gửi cảnh báo
 async function sendAlert(message: string, locationId: string) {
   try {
     // TODO: Thêm logic gửi thông báo như email, SMS, push notification
@@ -112,9 +107,7 @@ export async function getUnreadNotifications(userId: string) {
   }
 }
 
-/**
- * Đánh dấu thông báo đã đọc
- */
+// thông báo đã đọc
 export async function markNotificationAsRead(notificationId: string) {
   try {
     const notification = await Notification.findByIdAndUpdate(

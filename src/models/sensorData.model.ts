@@ -7,6 +7,7 @@ export interface ISensorData extends Document {
   recorded_at: Date;
   created_at: Date;
   locationId: mongoose.Types.ObjectId;
+  deviceId?: string; // Thêm trường deviceId
 }
 
 const SensorDataSchema: Schema = new Schema({
@@ -15,7 +16,8 @@ const SensorDataSchema: Schema = new Schema({
   light_intensity: { type: Number },
   recorded_at: { type: Date, default: Date.now },
   created_at: { type: Date, default: Date.now },
-  locationId: { type: Schema.Types.ObjectId, ref: 'Location', required: true }
+  locationId: { type: Schema.Types.ObjectId, ref: 'Location', required: true },
+  deviceId: { type: String } // Lưu ID của thiết bị gửi dữ liệu
 });
 
 export default mongoose.model<ISensorData>('SensorData', SensorDataSchema);

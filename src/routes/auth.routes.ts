@@ -22,4 +22,6 @@ router.post('/reset-password', authController.resetPassword);
 // Thay đổi mật khẩu (cần xác thực)
 router.post('/change-password', authenticate, authController.changePassword);
 
+router.delete('/account', authenticate, authController.deleteAccount);
+
 export default router;
