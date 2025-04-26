@@ -1,3 +1,5 @@
+// Cập nhật src/models/alertSetting.model.ts
+
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IAlertSettings extends Document {
@@ -10,6 +12,10 @@ export interface IAlertSettings extends Document {
   created_at: Date;
   updated_at: Date;
   locationId: mongoose.Types.ObjectId;
+  plantId?: mongoose.Types.ObjectId; // Thêm plantId (tùy chọn)
+  notification_channels: string[]; // Thêm kênh thông báo
+  alert_frequency: number; // Tần suất cảnh báo (phút)
+  last_alert_time?: Record<string, Date>; // Thời gian cảnh báo cuối cùng cho mỗi loại
 }
 
 const AlertSettingsSchema: Schema = new Schema({
@@ -21,7 +27,17 @@ const AlertSettingsSchema: Schema = new Schema({
   light_intensity_max: { type: Number, default: 800 },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
-  locationId: { type: Schema.Types.ObjectId, ref: 'Location', required: true }
+  locationId: { type: Schema.Types.ObjectId, ref: 'Location', required: true },
+  plantId: { type: Schema.Types.ObjectId, ref: 'Plant' }, // Tùy chọn
+  notification_channels: [{ 
+    type: String, 
+    enum: ['email', 'sms', 'push', 'webhook'],
+    default: ['email']
+  }],
+  alert_frequency: { type: Number, default: 60 }, // 60 phút
+  last_alert_time: { type: Map, of: Date }
 });
+
+AlertSettingsSchema.index({ locationId: 1, plantId: 1 });
 
 export default mongoose.model<IAlertSettings>('AlertSettings', AlertSettingsSchema);
