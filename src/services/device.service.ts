@@ -148,6 +148,7 @@ class DeviceService {
     }
   }
 
+  // Gán thiết bị vào vị trí
   async assignDeviceToLocation(
     deviceId: string,
     locationId: mongoose.Types.ObjectId

@@ -2,6 +2,10 @@
 import AlertSettings from '../models/alertSetting.model';
 import Notification from '../models/notification.model';
 import mongoose from 'mongoose';
+import { sendEmailNotification } from './notification.service';
+import User from '../models/user.model';
+import Location from '../models/location.model';
+import Season from '../models/season.model';
 
 export async function checkAlertThresholds(
   locationId: string,
@@ -76,16 +80,34 @@ export async function checkAlertThresholds(
   }
 }
 
-// gửi cảnh báo
 async function sendAlert(message: string, locationId: string) {
   try {
-    // TODO: Thêm logic gửi thông báo như email, SMS, push notification
-    // Ví dụ: Có thể sử dụng Firebase Cloud Messaging cho push notification
-
-    console.log(`Đã gửi cảnh báo "${message}" cho vị trí ${locationId}`);
+    // Tìm location để lấy thông tin season
+    const location = await Location.findById(locationId);
+    if (!location) {
+      console.error(`Không tìm thấy vị trí ${locationId}`);
+      return;
+    }
     
-    // Nếu bạn cần gửi email, có thể thêm code sử dụng Nodemailer tại đây
-    // Nếu bạn cần gửi SMS, có thể thêm code sử dụng Twilio tại đây
+    // Tìm season để lấy thông tin user
+    const season = await Season.findById(location.seasonId);
+    if (!season) {
+      console.error(`Không tìm thấy mùa vụ của vị trí ${locationId}`);
+      return;
+    }
+    
+    // Tìm user để lấy email
+    const user = await User.findById(season.userId);
+    if (!user) {
+      console.error(`Không tìm thấy người dùng của mùa vụ ${season._id}`);
+      return;
+    }
+    
+    // Gửi email thông báo
+    const subject = `Cảnh báo từ vị trí: ${location.name}`;
+    await sendEmailNotification(user.email, subject, message);
+    
+    console.log(`Đã gửi cảnh báo "${message}" cho vị trí ${locationId} đến ${user.email}`);
   } catch (error) {
     console.error('Lỗi khi gửi cảnh báo:', error);
   }
