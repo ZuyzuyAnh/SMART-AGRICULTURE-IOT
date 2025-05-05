@@ -143,7 +143,6 @@ class AuthService {
         created_at: new Date(),
       });
 
-      // Trong thực tế, sẽ gửi email ở đây. Nhưng ở bài tập này, chỉ trả về token
       return {
         message: "Yêu cầu đặt lại mật khẩu đã được gửi",
         token, // Chỉ để test, thực tế không nên trả về
