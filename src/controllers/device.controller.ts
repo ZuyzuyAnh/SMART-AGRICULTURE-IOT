@@ -30,6 +30,7 @@ export const registerDevice = async (req: Request, res: Response) => {
       deviceId,
       sensors,
       firmware_version,
+      registeredBy: new mongoose.Types.ObjectId(userId),
     });
 
     return res.status(201).json({

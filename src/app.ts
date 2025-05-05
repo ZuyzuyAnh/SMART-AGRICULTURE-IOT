@@ -18,8 +18,6 @@ import carePlanRouter from "./routes/carePlan.routes";
 import seasonHistoryRouter from "./routes/seasonHistory.routes"; 
 import deviceRouter from './routes/device.routes';
 
-
-
 import './services/mqtt.service'; 
 
 // Load environment variables

@@ -5,13 +5,13 @@ import { sendDeviceConfig } from './mqtt.service';
 
 
 class DeviceService {
-  // Đăng ký thiết bị mới
   async registerDevice(data: {
     name: string;
     type: string;
     deviceId: string;
     sensors: string[];
     firmware_version?: string;
+    registeredBy: mongoose.Types.ObjectId; // Thêm parameter này
   }): Promise<IDevice> {
     try {
       // Kiểm tra xem thiết bị đã tồn tại chưa
@@ -20,13 +20,14 @@ class DeviceService {
         throw new Error("Thiết bị với ID này đã tồn tại");
       }
 
-      // Tạo thiết bị mới
+      // Tạo thiết bị mới với registeredBy
       const device = new Device({
         name: data.name,
         type: data.type,
         deviceId: data.deviceId,
         sensors: data.sensors,
         firmware_version: data.firmware_version || "1.0.0",
+        registeredBy: data.registeredBy, // Lưu userId
         created_at: new Date(),
         updated_at: new Date(),
       });
@@ -67,8 +68,13 @@ class DeviceService {
       const locations = await Location.find({ seasonId: { $in: seasonIds } });
       const locationIds = locations.map((location) => location._id);
 
-      // Tìm tất cả thiết bị ở các location
-      return await Device.find({ locationId: { $in: locationIds } });
+      // Tìm thiết bị user đã đăng ký HOẶC đã được gán cho locations của user
+      return await Device.find({
+        $or: [
+          { registeredBy: userId },
+          { locationId: { $in: locationIds } }
+        ]
+      });
     } catch (error) {
       throw error;
     }
