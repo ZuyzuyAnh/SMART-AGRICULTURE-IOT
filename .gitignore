@@ -1,12 +1,9 @@
-# Bỏ qua node_modules
 node_modules/
 
-# Bỏ qua thư mục dist (thường dùng để chứa file build)
 dist/
 
 tfjs_model/
 
-# Environment variables
 .env
 .env.local
 .env.development

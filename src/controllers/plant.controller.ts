@@ -3,12 +3,22 @@ import mongoose from 'mongoose';
 import plantService from '../services/plant.service';
 import seasonService from '../services/season.service';
 import locationService from '../services/location.service';
+import path from 'path';
+import fs from 'fs';
 
 export const createPlant = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     const { locationId, seasonId } = req.params;
-    const { name, img, status, note, startdate } = req.body;
+    const { 
+      name, 
+      img, 
+      status, 
+      note, 
+      startdate, 
+      plantingDate, 
+      address 
+    } = req.body;
     
     if (!userId) {
       return res.status(401).json({
@@ -69,9 +79,11 @@ export const createPlant = async (req: Request, res: Response) => {
     const plant = await plantService.createPlant({
       name,
       img,
+      address,
       status: status || 'Đang tốt',
       note,
       startdate: startdate ? new Date(startdate) : new Date(),
+      plantingDate: plantingDate ? new Date(plantingDate) : null,
       locationId: new mongoose.Types.ObjectId(locationId),
       seasonId: new mongoose.Types.ObjectId(seasonId)
     });
@@ -323,7 +335,15 @@ export const updatePlant = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     const { plantId, seasonId } = req.params;
-    const { name, img, status, note } = req.body;
+    const { 
+      name, 
+      status, 
+      note, 
+      removeImage, 
+      defaultImage, 
+      plantingDate,
+      address
+    } = req.body;
     
     if (!userId) {
       return res.status(401).json({
@@ -376,11 +396,79 @@ export const updatePlant = async (req: Request, res: Response) => {
     
     // Cập nhật thông tin cây trồng
     const updateData: any = {};
+    
+    // Cập nhật các thông tin cơ bản
     if (name) updateData.name = name;
-    if (img !== undefined) updateData.img = img;
     if (status) updateData.status = status;
     if (note !== undefined) updateData.note = note;
+    if (address !== undefined) updateData.address = address;
+    if (plantingDate !== undefined) updateData.plantingDate = plantingDate ? new Date(plantingDate) : null;
     
+    // Xử lý cập nhật ảnh nếu có
+    // Trường hợp 1: Xóa ảnh
+    if (removeImage === 'true' || removeImage === true) {
+      // Xóa file ảnh cũ nếu không phải ảnh mặc định
+      if (existingPlant.img && !existingPlant.img.includes('default') && !existingPlant.img.startsWith('/defaults/')) {
+        try {
+          const imagePath = path.join(__dirname, '../../', existingPlant.img.substring(1));
+          if (fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
+          }
+        } catch (error) {
+          console.error("Lỗi khi xóa ảnh cũ:", error);
+        }
+      }
+      
+      // Đặt đường dẫn ảnh về rỗng
+      updateData.img = '';
+    }
+    // Trường hợp 2: Chọn ảnh mặc định
+    else if (defaultImage) {
+      // Xóa file ảnh cũ nếu không phải ảnh mặc định
+      if (existingPlant.img && !existingPlant.img.includes('default') && !existingPlant.img.startsWith('/defaults/')) {
+        try {
+          const imagePath = path.join(__dirname, '../../', existingPlant.img.substring(1));
+          if (fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
+          }
+        } catch (error) {
+          console.error("Lỗi khi xóa ảnh cũ:", error);
+        }
+      }
+      
+      // Đặt đường dẫn ảnh mặc định
+      updateData.img = `/defaults/plants/${defaultImage}`;
+    }
+    // Trường hợp 3: Upload ảnh mới
+    else if (req.file) {
+      // Xóa file ảnh cũ nếu không phải ảnh mặc định
+      if (existingPlant.img && !existingPlant.img.includes('default') && !existingPlant.img.startsWith('/defaults/')) {
+        try {
+          const imagePath = path.join(__dirname, '../../', existingPlant.img.substring(1));
+          if (fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
+          }
+        } catch (error) {
+          console.error("Lỗi khi xóa ảnh cũ:", error);
+        }
+      }
+      
+      // Đặt đường dẫn ảnh mới
+      updateData.img = `/uploads/plants/${req.file.filename}`;
+    }
+    
+    // Nếu không có dữ liệu cập nhật
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No data to update'
+      });
+    }
+    
+    // Thêm ngày cập nhật
+    updateData.updated_at = new Date();
+    
+    // Cập nhật cây trồng
     const updatedPlant = await plantService.updatePlant(
       new mongoose.Types.ObjectId(plantId),
       updateData
@@ -564,6 +652,169 @@ export const updatePlantStatus = async (req: Request, res: Response) => {
     return res.status(500).json({
       success: false,
       message: error instanceof Error ? error.message : 'An error occurred while updating plant status'
+    });
+  }
+};
+
+export const getPlantsByHarvestStatus = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized'
+      });
+    }
+    
+    // Lấy thông số từ query params
+    const isHarvested = req.query.harvested === 'true'; // true = đã thu hoạch, false = chưa thu hoạch
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = (req.query.search as string) || '';
+    
+    const result = await plantService.getPlantsByHarvestStatus(
+      userId,
+      isHarvested,
+      page,
+      limit,
+      search
+    );
+    
+    return res.status(200).json({
+      success: true,
+      message: `Plants with ${isHarvested ? 'harvested' : 'non-harvested'} status retrieved successfully`,
+      data: result
+    });
+  } catch (error) {
+    console.error('Error getting plants by harvest status:', error);
+    return res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : 'An error occurred while getting plants'
+    });
+  }
+};
+
+export const updateHarvestInfo = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const { plantId } = req.params;
+    const { harvestDate, yield: yieldData, quality } = req.body;
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized'
+      });
+    }
+    
+    if (!mongoose.Types.ObjectId.isValid(plantId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid plant ID'
+      });
+    }
+    
+    if (!harvestDate) {
+      return res.status(400).json({
+        success: false,
+        message: 'Harvest date is required'
+      });
+    }
+    
+    // Kiểm tra quyền truy cập
+    const plant = await plantService.getPlantById(new mongoose.Types.ObjectId(plantId));
+    
+    if (!plant) {
+      return res.status(404).json({
+        success: false,
+        message: 'Plant not found'
+      });
+    }
+    
+    // Kiểm tra quyền sở hữu qua seasonId
+    const season = await seasonService.getSeasonById(plant.seasonId);
+    
+    if (!season || season.userId.toString() !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden: You do not have access to this plant'
+      });
+    }
+    
+    // Cập nhật thông tin thu hoạch
+    const updatedPlant = await plantService.updateHarvestInfo(
+      new mongoose.Types.ObjectId(plantId),
+      {
+        harvestDate: new Date(harvestDate),
+        yield: yieldData,
+        quality
+      }
+    );
+    
+    return res.status(200).json({
+      success: true,
+      message: 'Harvest information updated successfully',
+      data: updatedPlant
+    });
+  } catch (error) {
+    console.error('Error updating harvest info:', error);
+    return res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : 'An error occurred while updating harvest information'
+    });
+  }
+};
+
+export const getYieldStats = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const { seasonId } = req.params;
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized'
+      });
+    }
+    
+    if (!mongoose.Types.ObjectId.isValid(seasonId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid season ID'
+      });
+    }
+    
+    // Kiểm tra quyền truy cập season
+    const season = await seasonService.getSeasonById(new mongoose.Types.ObjectId(seasonId));
+    
+    if (!season) {
+      return res.status(404).json({
+        success: false,
+        message: 'Season not found'
+      });
+    }
+    
+    if (season.userId.toString() !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden: You do not have access to this season'
+      });
+    }
+    
+    // Lấy thống kê sản lượng
+    const stats = await plantService.getYieldStatsBySeasonId(new mongoose.Types.ObjectId(seasonId));
+    
+    return res.status(200).json({
+      success: true,
+      message: 'Yield statistics retrieved successfully',
+      data: stats
+    });
+  } catch (error) {
+    console.error('Error getting yield stats:', error);
+    return res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : 'An error occurred while getting yield statistics'
     });
   }
 };

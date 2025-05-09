@@ -7,6 +7,7 @@ export interface IUser extends Document {
   password: string;
   address?: string;
   phone?: string;
+  avatar?: string; // Thêm trường avatar
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -15,7 +16,8 @@ const UserSchema: Schema = new Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   address: { type: String },
-  phone: { type: String }
+  phone: { type: String },
+  avatar: { type: String, default: '' }
 }, { timestamps: true });
 
 // Middleware để hash mật khẩu trước khi lưu
