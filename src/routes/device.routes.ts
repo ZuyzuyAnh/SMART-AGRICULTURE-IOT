@@ -1,7 +1,7 @@
 // src/routes/device.routes.ts
-import { Router } from 'express';
-import * as deviceController from '../controllers/device.controller';
-import { authenticate } from '../middleware/auth.middleware';
+import { Router } from "express";
+import * as deviceController from "../controllers/device.controller";
+import { authenticate } from "../middleware/auth.middleware";
 
 const router = Router();
 
@@ -9,26 +9,29 @@ const router = Router();
 router.use(authenticate);
 
 // Đăng ký thiết bị mới
-router.post('/register', deviceController.registerDevice);
+router.post("/register", deviceController.registerDevice);
 
 // Lấy tất cả thiết bị của người dùng
-router.get('/', deviceController.getUserDevices);
+router.get("/", deviceController.getUserDevices);
 
 // Gán thiết bị vào location
-router.post('/assign/:seasonId/:locationId', deviceController.assignDevice);
+router.post("/assign/:seasonId/:locationId", deviceController.assignDevice);
 
 // Gỡ thiết bị khỏi location
-router.delete('/remove/:deviceId', deviceController.removeDevice);
+router.delete("/remove/:deviceId", deviceController.removeDevice);
 
 // Lấy thiết bị theo location
-router.get('/location/:seasonId/:locationId', deviceController.getLocationDevices);
+router.get(
+  "/location/:seasonId/:locationId",
+  deviceController.getLocationDevices
+);
 
 // Cập nhật cài đặt thiết bị
-router.put('/settings/:deviceId', deviceController.updateDeviceSettings);
+router.put("/settings/:deviceId", deviceController.updateDeviceSettings);
 
 // Xóa thiết bị
-router.delete('/:deviceId', deviceController.deleteDeviceById);
+router.delete("/:deviceId", deviceController.deleteDeviceById);
 
-router.get('/qr/:deviceId', deviceController.generateDeviceQR);
+router.get("/qr/:deviceId", deviceController.generateDeviceQR);
 
 export default router;

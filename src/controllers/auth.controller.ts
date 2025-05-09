@@ -210,38 +210,42 @@ export const deleteAccount = async (req: Request, res: Response) => {
 export const uploadAvatar = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
-    
+
     if (!userId) {
       return res.status(401).json({
         success: false,
-        message: "Unauthorized"
+        message: "Unauthorized",
       });
     }
-    
+
     // Kiểm tra xem file có được upload không
     if (!req.file) {
       return res.status(400).json({
         success: false,
-        message: "Không có file được upload"
+        message: "Không có file được upload",
       });
     }
-    
+
     // Lấy đường dẫn file
     const avatarPath = `/uploads/avatars/${req.file.filename}`;
-    
+
     // Lấy thông tin user hiện tại để kiểm tra avatar cũ
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "Không tìm thấy người dùng"
+        message: "Không tìm thấy người dùng",
       });
     }
-    
+
     // Nếu đã có avatar cũ, xóa file cũ
-    if (user.avatar && user.avatar !== '' && !user.avatar.includes('default')) {
+    if (user.avatar && user.avatar !== "" && !user.avatar.includes("default")) {
       try {
-        const oldAvatarPath = path.join(__dirname, '../../', user.avatar.substring(1));
+        const oldAvatarPath = path.join(
+          __dirname,
+          "../../",
+          user.avatar.substring(1)
+        );
         if (fs.existsSync(oldAvatarPath)) {
           fs.unlinkSync(oldAvatarPath);
         }
@@ -249,25 +253,25 @@ export const uploadAvatar = async (req: Request, res: Response) => {
         console.error("Lỗi khi xóa avatar cũ:", error);
       }
     }
-    
+
     // Cập nhật avatar trong user
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { avatar: avatarPath },
       { new: true }
     );
-    
+
     res.status(200).json({
       success: true,
       message: "Upload avatar thành công",
       data: {
-        avatar: avatarPath
-      }
+        avatar: avatarPath,
+      },
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error instanceof Error ? error.message : "Lỗi khi upload avatar"
+      message: error instanceof Error ? error.message : "Lỗi khi upload avatar",
     });
   }
 };
@@ -275,27 +279,31 @@ export const uploadAvatar = async (req: Request, res: Response) => {
 export const removeAvatar = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
-    
+
     if (!userId) {
       return res.status(401).json({
         success: false,
-        message: "Unauthorized"
+        message: "Unauthorized",
       });
     }
-    
+
     // Lấy thông tin user hiện tại
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "Không tìm thấy người dùng"
+        message: "Không tìm thấy người dùng",
       });
     }
-    
+
     // Nếu có avatar, xóa file
-    if (user.avatar && user.avatar !== '' && !user.avatar.includes('default')) {
+    if (user.avatar && user.avatar !== "" && !user.avatar.includes("default")) {
       try {
-        const avatarPath = path.join(__dirname, '../../', user.avatar.substring(1));
+        const avatarPath = path.join(
+          __dirname,
+          "../../",
+          user.avatar.substring(1)
+        );
         if (fs.existsSync(avatarPath)) {
           fs.unlinkSync(avatarPath);
         }
@@ -303,25 +311,25 @@ export const removeAvatar = async (req: Request, res: Response) => {
         console.error("Lỗi khi xóa file avatar:", error);
       }
     }
-    
+
     // Cập nhật user để xóa avatar
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { avatar: '' },
+      { avatar: "" },
       { new: true }
     );
-    
+
     res.status(200).json({
       success: true,
       message: "Đã xóa avatar",
       data: {
-        avatar: ''
-      }
+        avatar: "",
+      },
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error instanceof Error ? error.message : "Lỗi khi xóa avatar"
+      message: error instanceof Error ? error.message : "Lỗi khi xóa avatar",
     });
   }
 };
@@ -329,17 +337,18 @@ export const removeAvatar = async (req: Request, res: Response) => {
 export const updateUserProfile = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
-    
+
     if (!userId) {
       return res.status(401).json({
         success: false,
-        message: "Unauthorized"
+        message: "Unauthorized",
       });
     }
-    
+
     // Lấy thông tin từ request body
-    const { username, email, address, phone, removeAvatar, defaultAvatar } = req.body;
-    
+    const { username, email, address, phone, removeAvatar, defaultAvatar } =
+      req.body;
+
     // Tạo object chứa các trường cần update
     const updateData: {
       username?: string;
@@ -348,29 +357,38 @@ export const updateUserProfile = async (req: Request, res: Response) => {
       phone?: string;
       avatar?: string;
     } = {};
-    
+
     // Cập nhật các trường thông tin cơ bản
     if (username) updateData.username = username;
     if (email) updateData.email = email;
     if (address !== undefined) updateData.address = address;
     if (phone !== undefined) updateData.phone = phone;
-    
+
     // Lấy thông tin user hiện tại
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "Không tìm thấy người dùng"
+        message: "Không tìm thấy người dùng",
       });
     }
-    
+
     // Xử lý avatar dựa trên yêu cầu
     // Trường hợp 1: Người dùng muốn xóa avatar
-    if (removeAvatar === 'true' || removeAvatar === true) {
+    if (removeAvatar === "true" || removeAvatar === true) {
       // Xóa file avatar cũ nếu có và không phải ảnh mặc định
-      if (user.avatar && user.avatar !== '' && !user.avatar.includes('default') && !user.avatar.startsWith('/defaults/')) {
+      if (
+        user.avatar &&
+        user.avatar !== "" &&
+        !user.avatar.includes("default") &&
+        !user.avatar.startsWith("/defaults/")
+      ) {
         try {
-          const avatarPath = path.join(__dirname, '../../', user.avatar.substring(1));
+          const avatarPath = path.join(
+            __dirname,
+            "../../",
+            user.avatar.substring(1)
+          );
           if (fs.existsSync(avatarPath)) {
             fs.unlinkSync(avatarPath);
           }
@@ -379,14 +397,23 @@ export const updateUserProfile = async (req: Request, res: Response) => {
         }
       }
       // Đặt avatar về chuỗi rỗng
-      updateData.avatar = '';
+      updateData.avatar = "";
     }
     // Trường hợp 2: Người dùng chọn ảnh đại diện mặc định từ FE
     else if (defaultAvatar) {
       // Kiểm tra nếu avatar hiện tại là uploaded file (không phải mặc định), xóa file cũ
-      if (user.avatar && user.avatar !== '' && !user.avatar.includes('default') && !user.avatar.startsWith('/defaults/')) {
+      if (
+        user.avatar &&
+        user.avatar !== "" &&
+        !user.avatar.includes("default") &&
+        !user.avatar.startsWith("/defaults/")
+      ) {
         try {
-          const oldAvatarPath = path.join(__dirname, '../../', user.avatar.substring(1));
+          const oldAvatarPath = path.join(
+            __dirname,
+            "../../",
+            user.avatar.substring(1)
+          );
           if (fs.existsSync(oldAvatarPath)) {
             fs.unlinkSync(oldAvatarPath);
           }
@@ -394,7 +421,7 @@ export const updateUserProfile = async (req: Request, res: Response) => {
           console.error("Lỗi khi xóa avatar cũ:", error);
         }
       }
-      
+
       // Lưu mã ảnh mặc định vào DB
       // Lưu ý: Ảnh mặc định có thể được định dạng như "default_avatar_1", "male_avatar", "female_avatar", etc.
       updateData.avatar = `/defaults/${defaultAvatar}`;
@@ -403,11 +430,20 @@ export const updateUserProfile = async (req: Request, res: Response) => {
     else if (req.file) {
       // Lấy đường dẫn file mới
       const avatarPath = `/uploads/avatars/${req.file.filename}`;
-      
+
       // Nếu đã có avatar cũ và không phải ảnh mặc định, xóa file cũ
-      if (user.avatar && user.avatar !== '' && !user.avatar.includes('default') && !user.avatar.startsWith('/defaults/')) {
+      if (
+        user.avatar &&
+        user.avatar !== "" &&
+        !user.avatar.includes("default") &&
+        !user.avatar.startsWith("/defaults/")
+      ) {
         try {
-          const oldAvatarPath = path.join(__dirname, '../../', user.avatar.substring(1));
+          const oldAvatarPath = path.join(
+            __dirname,
+            "../../",
+            user.avatar.substring(1)
+          );
           if (fs.existsSync(oldAvatarPath)) {
             fs.unlinkSync(oldAvatarPath);
           }
@@ -415,33 +451,34 @@ export const updateUserProfile = async (req: Request, res: Response) => {
           console.error("Lỗi khi xóa avatar cũ:", error);
         }
       }
-      
+
       // Thêm avatar vào dữ liệu cập nhật
       updateData.avatar = avatarPath;
     }
-    
+
     // Nếu không có dữ liệu gì để cập nhật
     if (Object.keys(updateData).length === 0) {
       return res.status(400).json({
         success: false,
-        message: "Không có thông tin để cập nhật"
+        message: "Không có thông tin để cập nhật",
       });
     }
-    
+
     // Gọi service để cập nhật
     const result = await authService.updateProfile(userId, updateData);
-    
+
     res.status(200).json({
       success: true,
       message: "Cập nhật thông tin thành công",
       data: {
-        user: result.user
-      }
+        user: result.user,
+      },
     });
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error instanceof Error ? error.message : "Lỗi khi cập nhật thông tin"
+      message:
+        error instanceof Error ? error.message : "Lỗi khi cập nhật thông tin",
     });
   }
 };

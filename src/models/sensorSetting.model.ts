@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema } from "mongoose";
 
 export interface ISensorSettings extends Document {
   frequency: number; // Tần suất lấy mẫu (phút)
@@ -15,7 +15,10 @@ const SensorSettingsSchema: Schema = new Schema({
   last_updated: { type: Date },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
-  locationId: { type: Schema.Types.ObjectId, ref: 'Location', required: true }
+  locationId: { type: Schema.Types.ObjectId, ref: "Location", required: true },
 });
 
-export default mongoose.model<ISensorSettings>('SensorSettings', SensorSettingsSchema);
+export default mongoose.model<ISensorSettings>(
+  "SensorSettings",
+  SensorSettingsSchema
+);

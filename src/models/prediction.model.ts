@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema } from "mongoose";
 
 export interface IPrediction extends Document {
   disease_name: string;
@@ -15,7 +15,11 @@ const PredictionSchema: Schema = new Schema({
   note: { type: String },
   predicted_at: { type: Date, default: Date.now },
   created_at: { type: Date, default: Date.now },
-  IMG4PredictId: { type: Schema.Types.ObjectId, ref: 'IMG4Predict', required: true }
+  IMG4PredictId: {
+    type: Schema.Types.ObjectId,
+    ref: "IMG4Predict",
+    required: true,
+  },
 });
 
-export default mongoose.model<IPrediction>('Prediction', PredictionSchema);
+export default mongoose.model<IPrediction>("Prediction", PredictionSchema);

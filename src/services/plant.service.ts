@@ -1,8 +1,8 @@
-import { IPlant } from '../models/plant.model';
-import Plant from '../models/plant.model';
-import Location from '../models/location.model';
-import Season from '../models/season.model';
-import mongoose from 'mongoose';
+import { IPlant } from "../models/plant.model";
+import Plant from "../models/plant.model";
+import Location from "../models/location.model";
+import Season from "../models/season.model";
+import mongoose from "mongoose";
 
 class PlantService {
   // Tạo cây trồng mới
@@ -12,13 +12,15 @@ class PlantService {
     address?: string;
     status?: string;
     startdate?: Date;
-    plantingDate?: Date;  // Thêm ngày trồng
-    harvestDate?: Date;   // Thêm ngày thu hoạch
-    yield?: {             // Thêm sản lượng
+    plantingDate?: Date; // Thêm ngày trồng
+    harvestDate?: Date; // Thêm ngày thu hoạch
+    yield?: {
+      // Thêm sản lượng
       amount?: number;
       unit?: string;
     };
-    quality?: {           // Thêm chất lượng
+    quality?: {
+      // Thêm chất lượng
       rating?: string;
       description?: string;
     };
@@ -30,21 +32,23 @@ class PlantService {
       // Kiểm tra xem Season có tồn tại không
       const seasonExists = await Season.exists({ _id: plantData.seasonId });
       if (!seasonExists) {
-        throw new Error('Season not found');
+        throw new Error("Season not found");
       }
-      
+
       // Kiểm tra xem Location có tồn tại không
-      const locationExists = await Location.exists({ _id: plantData.locationId });
+      const locationExists = await Location.exists({
+        _id: plantData.locationId,
+      });
       if (!locationExists) {
-        throw new Error('Location not found');
+        throw new Error("Location not found");
       }
-      
+
       const plant = new Plant({
         ...plantData,
         created_at: new Date(),
-        updated_at: new Date()
+        updated_at: new Date(),
       });
-      
+
       return await plant.save();
     } catch (error) {
       throw error;
@@ -68,18 +72,18 @@ class PlantService {
       const query = { locationId, ...filter };
       const total = await Plant.countDocuments(query);
       const totalPages = Math.ceil(total / limit);
-      
+
       const plants = await Plant.find(query)
         .sort({ created_at: -1 })
         .skip((page - 1) * limit)
         .limit(limit);
-        
+
       return {
         plants,
         total,
         page,
         limit,
-        totalPages
+        totalPages,
       };
     } catch (error) {
       throw error;
@@ -103,18 +107,18 @@ class PlantService {
       const query = { seasonId, ...filter };
       const total = await Plant.countDocuments(query);
       const totalPages = Math.ceil(total / limit);
-      
+
       const plants = await Plant.find(query)
         .sort({ created_at: -1 })
         .skip((page - 1) * limit)
         .limit(limit);
-        
+
       return {
         plants,
         total,
         page,
         limit,
-        totalPages
+        totalPages,
       };
     } catch (error) {
       throw error;
@@ -140,7 +144,7 @@ class PlantService {
         plantId,
         {
           ...updateData,
-          updated_at: new Date()
+          updated_at: new Date(),
         },
         { new: true }
       );
@@ -169,7 +173,7 @@ class PlantService {
         plantId,
         {
           status,
-          updated_at: new Date()
+          updated_at: new Date(),
         },
         { new: true }
       );
@@ -200,8 +204,8 @@ class PlantService {
           harvestDate: harvestData.harvestDate,
           yield: harvestData.yield,
           quality: harvestData.quality,
-          status: 'Đã thu hoạch',
-          updated_at: new Date()
+          status: "Đã thu hoạch",
+          updated_at: new Date(),
         },
         { new: true }
       );
@@ -216,7 +220,7 @@ class PlantService {
     isHarvested: boolean,
     page: number = 1,
     limit: number = 10,
-    search: string = ''
+    search: string = ""
   ): Promise<{
     plants: IPlant[];
     total: number;
@@ -226,74 +230,73 @@ class PlantService {
   }> {
     try {
       // Tìm tất cả season thuộc về user
-      const userSeasons = await Season.find({ userId: new mongoose.Types.ObjectId(userId) })
-        .select('_id');
-      
+      const userSeasons = await Season.find({
+        userId: new mongoose.Types.ObjectId(userId),
+      }).select("_id");
+
       if (userSeasons.length === 0) {
         return {
           plants: [],
           total: 0,
           page,
           limit,
-          totalPages: 0
+          totalPages: 0,
         };
       }
-      
+
       // Lấy danh sách seasonId
-      const seasonIds = userSeasons.map(season => season._id);
-      
+      const seasonIds = userSeasons.map((season) => season._id);
+
       // Xây dựng query dựa trên trạng thái thu hoạch
       let statusQuery;
       if (isHarvested) {
         // Nếu isHarvested = true, chỉ lấy cây với trạng thái "Đã thu hoạch" hoặc có harvestDate
-        statusQuery = { 
+        statusQuery = {
           $or: [
             { status: "Đã thu hoạch" },
-            { harvestDate: { $exists: true, $ne: null } }
-          ]
+            { harvestDate: { $exists: true, $ne: null } },
+          ],
         };
       } else {
         // Nếu isHarvested = false, lấy tất cả cây với trạng thái khác "Đã thu hoạch" và không có harvestDate
-        statusQuery = { 
+        statusQuery = {
           $and: [
             { status: { $ne: "Đã thu hoạch" } },
-            { $or: [
-                { harvestDate: { $exists: false } },
-                { harvestDate: null }
-              ]
-            }
-          ]
+            {
+              $or: [{ harvestDate: { $exists: false } }, { harvestDate: null }],
+            },
+          ],
         };
       }
-      
+
       // Thêm điều kiện tìm kiếm theo tên nếu có
-      const searchQuery = search 
-        ? { name: { $regex: search, $options: 'i' } }
+      const searchQuery = search
+        ? { name: { $regex: search, $options: "i" } }
         : {};
-      
+
       // Kết hợp các điều kiện query
       const query = {
         seasonId: { $in: seasonIds },
         ...statusQuery,
-        ...searchQuery
+        ...searchQuery,
       };
-      
+
       const total = await Plant.countDocuments(query);
       const totalPages = Math.ceil(total / limit);
-      
+
       const plants = await Plant.find(query)
-        .populate('locationId', 'name')  // Thêm thông tin location
-        .populate('seasonId', 'name')    // Thêm thông tin season
+        .populate("locationId", "name") // Thêm thông tin location
+        .populate("seasonId", "name") // Thêm thông tin season
         .sort({ updated_at: -1 })
         .skip((page - 1) * limit)
         .limit(limit);
-        
+
       return {
         plants,
         total,
         page,
         limit,
-        totalPages
+        totalPages,
       };
     } catch (error) {
       throw error;
@@ -310,81 +313,82 @@ class PlantService {
   }> {
     try {
       const totalPlants = await Plant.countDocuments({ seasonId });
-      
-      const harvestedPlants = await Plant.countDocuments({ 
+
+      const harvestedPlants = await Plant.countDocuments({
         seasonId,
         $or: [
           { status: "Đã thu hoạch" },
-          { harvestDate: { $exists: true, $ne: null } }
-        ]
+          { harvestDate: { $exists: true, $ne: null } },
+        ],
       });
-      
+
       // Lấy tất cả cây đã thu hoạch
       const harvestedData = await Plant.find({
         seasonId,
         $or: [
           { status: "Đã thu hoạch" },
-          { harvestDate: { $exists: true, $ne: null } }
+          { harvestDate: { $exists: true, $ne: null } },
         ],
-        'yield.amount': { $exists: true, $ne: null }
+        "yield.amount": { $exists: true, $ne: null },
       });
-      
+
       // Tính tổng sản lượng, đã chuyển đổi sang đơn vị kg
       let totalYield = 0;
       const yieldByQuality: Record<string, number> = {
-        'Tốt': 0,
-        'Trung bình': 0,
-        'Kém': 0
+        Tốt: 0,
+        "Trung bình": 0,
+        Kém: 0,
       };
 
-      harvestedData.forEach(plant => {
+      harvestedData.forEach((plant) => {
         if (plant.yield?.amount) {
           let amount = plant.yield.amount;
-          
+
           // Chuyển đổi đơn vị về kg
-          if (plant.yield.unit === 'tạ') {
+          if (plant.yield.unit === "tạ") {
             amount *= 100;
-          } else if (plant.yield.unit === 'tấn') {
+          } else if (plant.yield.unit === "tấn") {
             amount *= 1000;
           }
-          
+
           totalYield += amount;
-          
+
           // Thống kê theo chất lượng
           if (plant.quality?.rating) {
             yieldByQuality[plant.quality.rating] += amount;
           }
         }
       });
-      
+
       // Tính chất lượng trung bình
-      let averageQuality = 'Không xác định';
+      let averageQuality = "Không xác định";
       if (harvestedData.length > 0) {
         const qualityCounts: Record<string, number> = {
-          'Tốt': 0,
-          'Trung bình': 0,
-          'Kém': 0
+          Tốt: 0,
+          "Trung bình": 0,
+          Kém: 0,
         };
-        
-        harvestedData.forEach(plant => {
+
+        harvestedData.forEach((plant) => {
           if (plant.quality?.rating) {
             qualityCounts[plant.quality.rating]++;
           }
         });
-        
-        const maxQuality = Object.entries(qualityCounts).reduce((a, b) => 
-          a[1] > b[1] ? a : b, ['Không xác định', 0]
+
+        const maxQuality = Object.entries(qualityCounts).reduce(
+          (a, b) => (a[1] > b[1] ? a : b),
+          ["Không xác định", 0]
         );
-        
+
         averageQuality = maxQuality[0];
       }
-      
+
       return {
         totalPlants,
         harvestedPlants,
         totalYield,
         averageQuality,
-        yieldByQuality
+        yieldByQuality,
       };
     } catch (error) {
       throw error;

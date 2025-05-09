@@ -1,6 +1,6 @@
-import { ISeason } from '../models/season.model';
-import Season from '../models/season.model';
-import mongoose from 'mongoose';
+import { ISeason } from "../models/season.model";
+import Season from "../models/season.model";
+import mongoose from "mongoose";
 
 class SeasonService {
   // Tạo mùa vụ mới
@@ -14,9 +14,9 @@ class SeasonService {
       const season = new Season({
         ...seasonData,
         created_at: new Date(),
-        updated_at: new Date()
+        updated_at: new Date(),
       });
-      
+
       return await season.save();
     } catch (error) {
       throw error;
@@ -25,8 +25,8 @@ class SeasonService {
 
   // Lấy tất cả mùa vụ của user
   async getSeasonsByUserId(
-    userId: mongoose.Types.ObjectId, 
-    page: number = 1, 
+    userId: mongoose.Types.ObjectId,
+    page: number = 1,
     limit: number = 10,
     filter: any = {}
   ): Promise<{
@@ -40,18 +40,18 @@ class SeasonService {
       const query = { userId, ...filter };
       const total = await Season.countDocuments(query);
       const totalPages = Math.ceil(total / limit);
-      
+
       const seasons = await Season.find(query)
         .sort({ created_at: -1 })
         .skip((page - 1) * limit)
         .limit(limit);
-        
+
       return {
         seasons,
         total,
         page,
         limit,
-        totalPages
+        totalPages,
       };
     } catch (error) {
       throw error;
@@ -59,7 +59,9 @@ class SeasonService {
   }
 
   // Lấy chi tiết mùa vụ
-  async getSeasonById(seasonId: mongoose.Types.ObjectId): Promise<ISeason | null> {
+  async getSeasonById(
+    seasonId: mongoose.Types.ObjectId
+  ): Promise<ISeason | null> {
     try {
       return await Season.findById(seasonId);
     } catch (error) {
@@ -77,7 +79,7 @@ class SeasonService {
         seasonId,
         {
           ...updateData,
-          updated_at: new Date()
+          updated_at: new Date(),
         },
         { new: true }
       );
@@ -102,10 +104,10 @@ class SeasonService {
       // Bạn có thể mở rộng phần này để lấy thêm thông tin từ Plants
       // và các thực thể khác liên quan đến Season
       const season = await Season.findById(seasonId);
-      
+
       // Ví dụ: có thể thêm code để đếm số cây trồng trong mùa vụ
       // const plantCount = await Plant.countDocuments({ seasonId });
-      
+
       return {
         season,
         // stats: {

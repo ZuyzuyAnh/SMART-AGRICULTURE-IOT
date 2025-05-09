@@ -7,17 +7,17 @@ const router = Router();
 router.post("/predict/:imageId", async (req: Request, res: Response) => {
   try {
     const { imageId } = req.params;
-    
+
     const prediction = await predictService.predictById(imageId);
-    
+
     res.json({
       success: true,
-      prediction
+      prediction,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 });
