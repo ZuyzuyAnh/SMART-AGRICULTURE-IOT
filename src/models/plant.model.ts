@@ -6,6 +6,16 @@ export interface IPlant extends Document {
   address: string;
   status: string;
   startdate: Date;
+  plantingDate: Date;  // Ngày trồng
+  harvestDate: Date;   // Ngày thu hoạch
+  yield: {             // Sản lượng
+    amount: number;
+    unit: string;
+  };
+  quality: {           // Chất lượng
+    rating: string;
+    description: string;
+  };
   note: string;
   locationId: mongoose.Types.ObjectId;
   seasonId: mongoose.Types.ObjectId;
@@ -26,6 +36,16 @@ const PlantSchema: Schema = new Schema({
     default: 'Đang tốt'
   },
   startdate: { type: Date, default: Date.now },
+  plantingDate: { type: Date }, // Ngày trồng
+  harvestDate: { type: Date },  // Ngày thu hoạch
+  yield: {
+    amount: { type: Number },
+    unit: { type: String, enum: ['kg', 'tấn', 'tạ'], default: 'kg' }
+  },
+  quality: {
+    rating: { type: String, enum: ['Tốt', 'Trung bình', 'Kém'], default: 'Tốt' },
+    description: { type: String }
+  },
   note: { type: String },
   locationId: { type: Schema.Types.ObjectId, ref: 'Location' },
   seasonId: { type: Schema.Types.ObjectId, ref: 'Season' },

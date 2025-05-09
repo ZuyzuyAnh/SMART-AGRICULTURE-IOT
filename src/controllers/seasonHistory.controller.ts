@@ -28,10 +28,10 @@ export const archiveSeason = async (req: Request, res: Response) => {
       });
     }
     
-    if (!harvest_date || !total_yield || !yield_quality) {
+    if (!harvest_date) {
       return res.status(400).json({
         success: false,
-        message: 'Vui lòng cung cấp ngày thu hoạch, tổng sản lượng và chất lượng'
+        message: 'Vui lòng cung cấp ngày thu hoạch'
       });
     }
     
@@ -63,8 +63,8 @@ export const archiveSeason = async (req: Request, res: Response) => {
       new mongoose.Types.ObjectId(seasonId),
       {
         harvest_date: new Date(harvest_date),
-        total_yield,
-        yield_quality,
+        total_yield,  // Không bắt buộc, có thể tính từ các cây trồng
+        yield_quality, // Không bắt buộc, có thể tính từ các cây trồng
         total_cost,
         total_revenue,
         weather_conditions,

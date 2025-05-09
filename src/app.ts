@@ -17,6 +17,8 @@ import notificationRouter from "./routes/notification.routes";
 import carePlanRouter from "./routes/carePlan.routes"; 
 import seasonHistoryRouter from "./routes/seasonHistory.routes"; 
 import deviceRouter from './routes/device.routes';
+import { authenticate } from "./middleware/auth.middleware";
+import * as plantController from "./controllers/plant.controller";
 
 import './services/mqtt.service'; 
 
@@ -41,23 +43,21 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+app.use("/defaults", express.static(path.join(__dirname, "../public/defaults")));
 
-// Routes
 app.use("/", fileUploadRouter);
 app.use("/", predictRouter);
 app.use("/auth", authRouter);
 app.use("/api/seasons", seasonRouter);
 app.use("/api/seasons/:seasonId/locations", locationRouter);
 app.use("/api/seasons/:seasonId/locations/:locationId/plants", plantRouter); // Nested route for plants
-// Thêm routes
 app.use('/api/sensors', sensorRouter);
 app.use('/api/alerts', alertRouter);
 app.use('/api/notifications', notificationRouter);
 app.use('/api/seasons/:seasonId/locations/:locationId/plants/:plantId/care-plan', carePlanRouter);
 app.use('/api/season-histories', seasonHistoryRouter);
 app.use('/api/devices', deviceRouter);
-
-
+app.use('/api/plants/harvest-status', authenticate, plantController.getPlantsByHarvestStatus);
 
 // Root endpoint
 app.get("/", (req, res) => {

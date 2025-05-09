@@ -13,8 +13,8 @@ class SeasonHistoryService {
     seasonId: mongoose.Types.ObjectId,
     data: {
       harvest_date: Date;
-      total_yield: number;
-      yield_quality: string;
+      total_yield?: number;  // Làm thành optional vì có thể tính từ các cây đã thu hoạch
+      yield_quality?: string; // Làm thành optional vì có thể tính từ các cây đã thu hoạch
       total_cost?: number;
       total_revenue?: number;
       weather_conditions?: string;
@@ -40,8 +40,80 @@ class SeasonHistoryService {
       // Tính toán số liệu thống kê
       const plants = await Plant.find({ seasonId });
       const totalPlants = plants.length;
-      const successfulPlants = plants.filter(p => p.status === 'Đã thu hoạch').length;
+      
+      // Đếm các cây đã thu hoạch dựa trên trạng thái hoặc harvestDate
+      const successfulPlants = plants.filter(p => 
+        p.status === 'Đã thu hoạch' || 
+        (p.harvestDate !== undefined && p.harvestDate !== null)
+      ).length;
+      
       const failedPlants = plants.filter(p => p.status === 'Có vấn đề' || p.status === 'Thất bại').length;
+      
+      // Tính tổng sản lượng từ thông tin các cây nếu không được cung cấp
+      let totalYield = data.total_yield;
+      let yieldQuality = data.yield_quality;
+      
+      if (totalYield === undefined || yieldQuality === undefined) {
+        // Lấy tất cả cây đã thu hoạch
+        const harvestedPlants = plants.filter(p => 
+          p.status === 'Đã thu hoạch' || 
+          (p.harvestDate !== undefined && p.harvestDate !== null)
+        );
+        
+        // Tính tổng sản lượng
+        if (totalYield === undefined) {
+          let calculatedYield = 0;
+          
+          harvestedPlants.forEach(plant => {
+            if (plant.yield?.amount) {
+              let amount = plant.yield.amount;
+              
+              // Chuyển đổi đơn vị về kg
+              if (plant.yield.unit === 'tạ') {
+                amount *= 100;
+              } else if (plant.yield.unit === 'tấn') {
+                amount *= 1000;
+              }
+              
+              calculatedYield += amount;
+            }
+          });
+          
+          totalYield = calculatedYield;
+        }
+        
+        // Xác định chất lượng trung bình nếu không được cung cấp
+        if (yieldQuality === undefined) {
+          const qualityCounts: Record<string, number> = {
+            'Xuất sắc': 0,
+            'Tốt': 0,
+            'Trung bình': 0,
+            'Kém': 0
+          };
+          
+          // Ánh xạ giữa rating của Plant và rating của SeasonHistory
+          const qualityMapping: Record<string, string> = {
+            'Tốt': 'Tốt',
+            'Trung bình': 'Trung bình',
+            'Kém': 'Kém'
+          };
+          
+          harvestedPlants.forEach(plant => {
+            if (plant.quality?.rating) {
+              const mappedQuality = qualityMapping[plant.quality.rating] || 'Trung bình';
+              qualityCounts[mappedQuality]++;
+            }
+          });
+          
+          // Xác định chất lượng phổ biến nhất
+          const maxQuality = Object.entries(qualityCounts).reduce(
+            (a, b) => a[1] > b[1] ? a : b, 
+            ['Trung bình', 0]
+          );
+          
+          yieldQuality = maxQuality[0];
+        }
+      }
       
       // Tính lợi nhuận
       const profit = (data.total_revenue || 0) - (data.total_cost || 0);
@@ -54,8 +126,8 @@ class SeasonHistoryService {
         start_date: season.start_date,
         end_date: season.end_date,
         harvest_date: data.harvest_date,
-        total_yield: data.total_yield,
-        yield_quality: data.yield_quality,
+        total_yield: totalYield || 0,
+        yield_quality: yieldQuality || 'Trung bình',
         total_plants: totalPlants,
         successful_plants: successfulPlants,
         failed_plants: failedPlants,
