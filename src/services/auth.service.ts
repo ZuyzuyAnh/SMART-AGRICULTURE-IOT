@@ -48,7 +48,7 @@ class AuthService {
           email: user.email,
           address: user.address,
           phone: user.phone,
-          avatar: user.avatar || '',
+          avatar: user.avatar || "",
         },
         token,
       };
@@ -82,7 +82,7 @@ class AuthService {
           email: user.email,
           address: user.address,
           phone: user.phone,
-          avatar: user.avatar || '',
+          avatar: user.avatar || "",
         },
         token,
       };
@@ -115,7 +115,7 @@ class AuthService {
         id: user._id,
         email: user.email,
         username: user.username,
-        avatar: user.avatar || '',
+        avatar: user.avatar || "",
       };
     } catch (error) {
       throw new Error("Invalid token");
@@ -285,19 +285,22 @@ class AuthService {
     }
   }
 
-  async updateProfile(userId: string, updateData: {
-    username?: string;
-    email?: string;
-    address?: string;
-    phone?: string;
-    avatar?: string;
-  }) {
+  async updateProfile(
+    userId: string,
+    updateData: {
+      username?: string;
+      email?: string;
+      address?: string;
+      phone?: string;
+      avatar?: string;
+    }
+  ) {
     try {
       // Kiểm tra username và email mới có trùng với user khác không
       if (updateData.username) {
         const existingUsername = await User.findOne({
           username: updateData.username,
-          _id: { $ne: userId }
+          _id: { $ne: userId },
         });
         if (existingUsername) {
           throw new Error("Username đã tồn tại");
@@ -307,7 +310,7 @@ class AuthService {
       if (updateData.email) {
         const existingEmail = await User.findOne({
           email: updateData.email,
-          _id: { $ne: userId }
+          _id: { $ne: userId },
         });
         if (existingEmail) {
           throw new Error("Email đã tồn tại");
@@ -317,10 +320,10 @@ class AuthService {
       // Cập nhật thông tin user
       const updatedUser = await User.findByIdAndUpdate(
         userId,
-        { 
-          $set: { 
-            ...updateData 
-          } 
+        {
+          $set: {
+            ...updateData,
+          },
         },
         { new: true }
       );
@@ -337,8 +340,8 @@ class AuthService {
           email: updatedUser.email,
           address: updatedUser.address,
           phone: updatedUser.phone,
-          avatar: updatedUser.avatar || ''
-        }
+          avatar: updatedUser.avatar || "",
+        },
       };
     } catch (error) {
       throw error;

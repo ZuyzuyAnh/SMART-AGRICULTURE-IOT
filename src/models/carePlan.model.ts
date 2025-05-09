@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema } from "mongoose";
 
 export interface ICarePlan extends Document {
   date: Date;
@@ -14,14 +14,14 @@ const CarePlanSchema: Schema = new Schema({
   date: { type: Date, required: true },
   type: { type: String, required: true },
   note: { type: String },
-  status: { 
+  status: {
     type: String,
-    enum: ['Đang thực hiện', 'Đã hoàn thành', 'Đã hủy'],
-    default: 'Đang thực hiện'
+    enum: ["Đang thực hiện", "Đã hoàn thành", "Đã hủy"],
+    default: "Đang thực hiện",
   },
-  careTasksId: { type: Schema.Types.ObjectId, ref: 'CareTask' },
+  careTasksId: { type: Schema.Types.ObjectId, ref: "CareTask" },
   created_at: { type: Date, default: Date.now },
-  updated_at: { type: Date, default: Date.now }
+  updated_at: { type: Date, default: Date.now },
 });
 
-export default mongoose.model<ICarePlan>('CarePlan', CarePlanSchema);
+export default mongoose.model<ICarePlan>("CarePlan", CarePlanSchema);

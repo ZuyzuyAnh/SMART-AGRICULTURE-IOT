@@ -100,7 +100,7 @@ class ImagePredictionService {
       );
 
       // Lấy dữ liệu từ tensor output
-      const predictionData = await predictions.data() as Float32Array;
+      const predictionData = (await predictions.data()) as Float32Array;
       const predictionArray = Array.from(predictionData);
       const maxProbability = Math.max(...predictionArray);
       const classIndex = predictionArray.indexOf(maxProbability);
@@ -119,7 +119,9 @@ class ImagePredictionService {
         const prediction = new Prediction({
           disease_name: className,
           confidence: maxProbability,
-          note: `Predicted with confidence: ${(maxProbability * 100).toFixed(2)}%`,
+          note: `Predicted with confidence: ${(maxProbability * 100).toFixed(
+            2
+          )}%`,
           predicted_at: new Date(),
           created_at: new Date(),
           IMG4PredictId: new mongoose.Types.ObjectId(imageId),

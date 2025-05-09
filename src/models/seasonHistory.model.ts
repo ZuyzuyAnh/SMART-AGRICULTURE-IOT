@@ -1,5 +1,5 @@
 // src/models/seasonHistory.model.ts
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema } from "mongoose";
 
 export interface ISeasonHistory extends Document {
   seasonId: mongoose.Types.ObjectId;
@@ -26,14 +26,18 @@ export interface ISeasonHistory extends Document {
 }
 
 const SeasonHistorySchema: Schema = new Schema({
-  seasonId: { type: Schema.Types.ObjectId, ref: 'Season', required: true },
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  seasonId: { type: Schema.Types.ObjectId, ref: "Season", required: true },
+  userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
   name: { type: String, required: true },
   start_date: { type: Date, required: true },
   end_date: { type: Date, required: true },
   harvest_date: { type: Date, required: true },
   total_yield: { type: Number, default: 0 },
-  yield_quality: { type: String, enum: ['Xuất sắc', 'Tốt', 'Trung bình', 'Kém'], default: 'Trung bình' },
+  yield_quality: {
+    type: String,
+    enum: ["Xuất sắc", "Tốt", "Trung bình", "Kém"],
+    default: "Trung bình",
+  },
   total_plants: { type: Number, default: 0 },
   successful_plants: { type: Number, default: 0 },
   failed_plants: { type: Number, default: 0 },
@@ -46,7 +50,10 @@ const SeasonHistorySchema: Schema = new Schema({
   lessons_learned: { type: String },
   notes: { type: String },
   images: [{ type: String }],
-  created_at: { type: Date, default: Date.now }
+  created_at: { type: Date, default: Date.now },
 });
 
-export default mongoose.model<ISeasonHistory>('SeasonHistory', SeasonHistorySchema);
+export default mongoose.model<ISeasonHistory>(
+  "SeasonHistory",
+  SeasonHistorySchema
+);

@@ -1,8 +1,7 @@
 import mongoose from "mongoose";
 import Device, { IDevice } from "../models/device.model";
 import Location from "../models/location.model";
-import { sendDeviceConfig } from './mqtt.service';
-
+import { sendDeviceConfig } from "./mqtt.service";
 
 class DeviceService {
   async registerDevice(data: {
@@ -37,7 +36,7 @@ class DeviceService {
       throw error;
     }
   }
-  
+
   // Gỡ thiết bị khỏi location
   async removeDeviceFromLocation(deviceId: string): Promise<IDevice | null> {
     try {
@@ -70,10 +69,7 @@ class DeviceService {
 
       // Tìm thiết bị user đã đăng ký HOẶC đã được gán cho locations của user
       return await Device.find({
-        $or: [
-          { registeredBy: userId },
-          { locationId: { $in: locationIds } }
-        ]
+        $or: [{ registeredBy: userId }, { locationId: { $in: locationIds } }],
       });
     } catch (error) {
       throw error;

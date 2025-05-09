@@ -1,5 +1,5 @@
-import mongoose, { Document, Schema } from 'mongoose';
-import bcrypt from 'bcrypt';
+import mongoose, { Document, Schema } from "mongoose";
+import bcrypt from "bcrypt";
 
 export interface IUser extends Document {
   username: string;
@@ -11,20 +11,23 @@ export interface IUser extends Document {
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-const UserSchema: Schema = new Schema({
-  username: { type: String, required: true, unique: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  address: { type: String },
-  phone: { type: String },
-  avatar: { type: String, default: '' }
-}, { timestamps: true });
+const UserSchema: Schema = new Schema(
+  {
+    username: { type: String, required: true, unique: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    address: { type: String },
+    phone: { type: String },
+    avatar: { type: String, default: "" },
+  },
+  { timestamps: true }
+);
 
 // Middleware để hash mật khẩu trước khi lưu
-UserSchema.pre<IUser>('save', async function(next) {
+UserSchema.pre<IUser>("save", async function (next) {
   // Chỉ hash mật khẩu nếu nó được sửa đổi hoặc mới
-  if (!this.isModified('password')) return next();
-  
+  if (!this.isModified("password")) return next();
+
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
@@ -35,8 +38,10 @@ UserSchema.pre<IUser>('save', async function(next) {
 });
 
 // Phương thức so sánh mật khẩu
-UserSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
+UserSchema.methods.comparePassword = async function (
+  candidatePassword: string
+): Promise<boolean> {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-export default mongoose.model<IUser>('User', UserSchema);
+export default mongoose.model<IUser>("User", UserSchema);

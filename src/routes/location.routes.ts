@@ -1,6 +1,6 @@
-import { Router } from 'express';
-import * as locationController from '../controllers/location.controller';
-import { authenticate } from '../middleware/auth.middleware';
+import { Router } from "express";
+import * as locationController from "../controllers/location.controller";
+import { authenticate } from "../middleware/auth.middleware";
 
 const router = Router({ mergeParams: true }); // mergeParams để có thể truy cập params từ router cha
 
@@ -8,18 +8,18 @@ const router = Router({ mergeParams: true }); // mergeParams để có thể tru
 router.use(authenticate);
 
 // Tạo location mới trong season
-router.post('/', locationController.createLocation);
+router.post("/", locationController.createLocation);
 
 // Lấy tất cả locations trong season
-router.get('/', locationController.getLocations);
+router.get("/", locationController.getLocations);
 
 // Lấy chi tiết location
-router.get('/:locationId', locationController.getLocationById);
+router.get("/:locationId", locationController.getLocationById);
 
 // Cập nhật location
-router.put('/:locationId', locationController.updateLocation);
+router.put("/:locationId", locationController.updateLocation);
 
 // Xóa location
-router.delete('/:locationId', locationController.deleteLocation);
+router.delete("/:locationId", locationController.deleteLocation);
 
 export default router;

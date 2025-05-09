@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema } from "mongoose";
 
 export interface IHistoryPlant extends Document {
   volumn: number;
@@ -8,18 +8,21 @@ export interface IHistoryPlant extends Document {
 }
 
 const HistoryPlantSchema: Schema = new Schema({
-  volumn: { type: Number, comment: 'Harvest volume in kg' },
-  status: { 
+  volumn: { type: Number, comment: "Harvest volume in kg" },
+  status: {
     type: String,
-    enum: ['Đã thu hoạch', 'Đã hủy', 'Thất bại'],
-    default: 'Đã thu hoạch'
+    enum: ["Đã thu hoạch", "Đã hủy", "Thất bại"],
+    default: "Đã thu hoạch",
   },
-  quality: { 
+  quality: {
     type: String,
-    enum: ['Tệ', 'Ổn', 'Tốt', 'Rất tốt'],
-    default: 'Tốt'
+    enum: ["Tệ", "Ổn", "Tốt", "Rất tốt"],
+    default: "Tốt",
   },
-  created_at: { type: Date, default: Date.now }
+  created_at: { type: Date, default: Date.now },
 });
 
-export default mongoose.model<IHistoryPlant>('HistoryPlant', HistoryPlantSchema);
+export default mongoose.model<IHistoryPlant>(
+  "HistoryPlant",
+  HistoryPlantSchema
+);

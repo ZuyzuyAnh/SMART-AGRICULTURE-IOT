@@ -185,18 +185,18 @@ const cleanupTempFiles = (directory: string, maxAgeHours = 24) => {
     const files = fs.readdirSync(directory);
     const now = Date.now();
     const maxAgeMs = maxAgeHours * 60 * 60 * 1000;
-    
+
     for (const file of files) {
       // Bỏ qua các tệp .gitkeep
-      if (file === '.gitkeep') continue;
-      
+      if (file === ".gitkeep") continue;
+
       const filePath = path.join(directory, file);
       const stats = fs.statSync(filePath);
-      
+
       // Kiểm tra xem tệp có cũ hơn maxAgeHours không
       if (now - stats.mtimeMs > maxAgeMs) {
         // Chỉ xóa tệp tạm bắt đầu bằng "temp_" hoặc có định dạng [uuid]_[number]
-        if (file.startsWith('temp_') || /^[0-9a-f-]+_\d+$/.test(file)) {
+        if (file.startsWith("temp_") || /^[0-9a-f-]+_\d+$/.test(file)) {
           fs.unlinkSync(filePath);
           console.log(`Đã xóa tệp tạm cũ: ${filePath}`);
         }
@@ -207,12 +207,11 @@ const cleanupTempFiles = (directory: string, maxAgeHours = 24) => {
   }
 };
 
-
 // Lên lịch dọn dẹp tệp tạm tự động
 const scheduleCleanup = () => {
   // Dọn dẹp ngay khi khởi động
   cleanupTempFiles("temp");
-  
+
   // Lên lịch dọn dẹp hàng giờ
   setInterval(() => {
     cleanupTempFiles("temp");

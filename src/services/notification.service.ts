@@ -1,32 +1,32 @@
-import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
 
 dotenv.config();
 
 // Cấu hình email transport
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.EMAIL_PORT || '587'),
-  secure: process.env.EMAIL_SECURE === 'true',
+  host: process.env.EMAIL_HOST || "smtp.gmail.com",
+  port: parseInt(process.env.EMAIL_PORT || "587"),
+  secure: process.env.EMAIL_SECURE === "true",
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
+    pass: process.env.EMAIL_PASS,
+  },
 });
 
 // Gửi email thông báo
 export async function sendEmailNotification(
-  to: string, 
-  subject: string, 
+  to: string,
+  subject: string,
   message: string
 ): Promise<boolean> {
   try {
     // Kiểm tra cấu hình email hợp lệ
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      console.error('Thiếu cấu hình email trong biến môi trường');
+      console.error("Thiếu cấu hình email trong biến môi trường");
       return false;
     }
-    
+
     const mailOptions = {
       from: `"Hệ thống IoT Nông nghiệp" <${process.env.EMAIL_USER}>`,
       to,
@@ -40,14 +40,14 @@ export async function sendEmailNotification(
             Đây là email tự động, vui lòng không trả lời.
           </p>
         </div>
-      `
+      `,
     };
-    
+
     const info = await transporter.sendMail(mailOptions);
-    console.log('Email được gửi thành công:', info.messageId);
+    console.log("Email được gửi thành công:", info.messageId);
     return true;
   } catch (error) {
-    console.error('Lỗi khi gửi email:', error);
+    console.error("Lỗi khi gửi email:", error);
     return false;
   }
 }
