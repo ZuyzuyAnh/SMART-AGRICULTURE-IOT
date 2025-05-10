@@ -82,3 +82,25 @@ export const authenticate = async (
     });
   }
 };
+
+export const isAdmin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const user = await User.findById(req.user?.id);
+    if (!user || user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Không có quyền truy cập",
+      });
+    }
+    next();
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Lỗi khi kiểm tra quyền admin",
+    });
+  }
+};

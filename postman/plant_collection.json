@@ -1,0 +1,375 @@
+{
+  "info": {
+    "name": "Smart Agriculture - Plant APIs",
+    "description": "Collection các API quản lý cây trồng",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Tạo cây trồng mới",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "name",
+              "value": "Cây cà chua",
+              "type": "text",
+              "description": "Tên cây trồng"
+            },
+            {
+              "key": "image",
+              "type": "file",
+              "src": "/path/to/image.jpg",
+              "description": "Ảnh cây trồng (tùy chọn)"
+            },
+            {
+              "key": "defaultImage",
+              "value": "default-plant.jpg",
+              "type": "text",
+              "description": "Tên ảnh mặc định (tùy chọn)"
+            },
+            {
+              "key": "status",
+              "value": "Đang tốt",
+              "type": "text",
+              "description": "Trạng thái cây trồng"
+            },
+            {
+              "key": "note",
+              "value": "Cây phát triển tốt",
+              "type": "text",
+              "description": "Ghi chú"
+            },
+            {
+              "key": "startdate",
+              "value": "2024-03-20",
+              "type": "text",
+              "description": "Ngày bắt đầu"
+            },
+            {
+              "key": "plantingDate",
+              "value": "2024-03-21",
+              "type": "text",
+              "description": "Ngày trồng"
+            },
+            {
+              "key": "address",
+              "value": "Khu vực A",
+              "type": "text",
+              "description": "Địa chỉ"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/api/seasons/{{seasonId}}/locations/{{locationId}}/plants",
+          "host": ["{{base_url}}"],
+          "path": [
+            "api",
+            "seasons",
+            "{{seasonId}}",
+            "locations",
+            "{{locationId}}",
+            "plants"
+          ]
+        },
+        "description": "Tạo một cây trồng mới trong vị trí và mùa vụ"
+      }
+    },
+    {
+      "name": "Lấy danh sách cây trồng theo vị trí",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/seasons/{{seasonId}}/locations/{{locationId}}/plants?page=1&limit=10&status=Đang tốt&search=cà chua",
+          "host": ["{{base_url}}"],
+          "path": [
+            "api",
+            "seasons",
+            "{{seasonId}}",
+            "locations",
+            "{{locationId}}",
+            "plants"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "1",
+              "description": "Số trang"
+            },
+            {
+              "key": "limit",
+              "value": "10",
+              "description": "Số lượng item mỗi trang"
+            },
+            {
+              "key": "status",
+              "value": "Đang tốt",
+              "description": "Lọc theo trạng thái"
+            },
+            {
+              "key": "search",
+              "value": "cà chua",
+              "description": "Tìm kiếm theo tên"
+            }
+          ]
+        },
+        "description": "Lấy danh sách cây trồng trong một vị trí"
+      }
+    },
+    {
+      "name": "Lấy chi tiết cây trồng",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/seasons/{{seasonId}}/locations/{{locationId}}/plants/{{plantId}}",
+          "host": ["{{base_url}}"],
+          "path": [
+            "api",
+            "seasons",
+            "{{seasonId}}",
+            "locations",
+            "{{locationId}}",
+            "plants",
+            "{{plantId}}"
+          ]
+        },
+        "description": "Lấy thông tin chi tiết của một cây trồng"
+      }
+    },
+    {
+      "name": "Cập nhật cây trồng",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "name",
+              "value": "Cây cà chua mới",
+              "type": "text",
+              "description": "Tên cây trồng"
+            },
+            {
+              "key": "image",
+              "type": "file",
+              "src": "/path/to/new-image.jpg",
+              "description": "Ảnh mới (tùy chọn)"
+            },
+            {
+              "key": "defaultImage",
+              "value": "default-plant.jpg",
+              "type": "text",
+              "description": "Tên ảnh mặc định (tùy chọn)"
+            },
+            {
+              "key": "removeImage",
+              "value": "false",
+              "type": "text",
+              "description": "Xóa ảnh hiện tại"
+            },
+            {
+              "key": "status",
+              "value": "Cần chú ý",
+              "type": "text",
+              "description": "Trạng thái cây trồng"
+            },
+            {
+              "key": "note",
+              "value": "Cây cần được chăm sóc",
+              "type": "text",
+              "description": "Ghi chú"
+            },
+            {
+              "key": "plantingDate",
+              "value": "2024-03-22",
+              "type": "text",
+              "description": "Ngày trồng"
+            },
+            {
+              "key": "address",
+              "value": "Khu vực B",
+              "type": "text",
+              "description": "Địa chỉ"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/api/seasons/{{seasonId}}/locations/{{locationId}}/plants/{{plantId}}",
+          "host": ["{{base_url}}"],
+          "path": [
+            "api",
+            "seasons",
+            "{{seasonId}}",
+            "locations",
+            "{{locationId}}",
+            "plants",
+            "{{plantId}}"
+          ]
+        },
+        "description": "Cập nhật thông tin của một cây trồng"
+      }
+    },
+    {
+      "name": "Cập nhật trạng thái cây trồng",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"status\": \"Đã thu hoạch\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/seasons/{{seasonId}}/locations/{{locationId}}/plants/{{plantId}}/status",
+          "host": ["{{base_url}}"],
+          "path": [
+            "api",
+            "seasons",
+            "{{seasonId}}",
+            "locations",
+            "{{locationId}}",
+            "plants",
+            "{{plantId}}",
+            "status"
+          ]
+        },
+        "description": "Cập nhật trạng thái của một cây trồng"
+      }
+    },
+    {
+      "name": "Xóa cây trồng",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/seasons/{{seasonId}}/locations/{{locationId}}/plants/{{plantId}}",
+          "host": ["{{base_url}}"],
+          "path": [
+            "api",
+            "seasons",
+            "{{seasonId}}",
+            "locations",
+            "{{locationId}}",
+            "plants",
+            "{{plantId}}"
+          ]
+        },
+        "description": "Xóa một cây trồng"
+      }
+    },
+    {
+      "name": "Lấy danh sách cây trồng theo trạng thái thu hoạch",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/plants/harvest-status?harvested=true&page=1&limit=10&search=cà chua",
+          "host": ["{{base_url}}"],
+          "path": ["api", "plants", "harvest-status"],
+          "query": [
+            {
+              "key": "harvested",
+              "value": "true",
+              "description": "true = đã thu hoạch, false = chưa thu hoạch"
+            },
+            {
+              "key": "page",
+              "value": "1",
+              "description": "Số trang"
+            },
+            {
+              "key": "limit",
+              "value": "10",
+              "description": "Số lượng item mỗi trang"
+            },
+            {
+              "key": "search",
+              "value": "cà chua",
+              "description": "Tìm kiếm theo tên"
+            }
+          ]
+        },
+        "description": "Lấy danh sách cây trồng theo trạng thái thu hoạch"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "your_jwt_token",
+      "type": "string"
+    },
+    {
+      "key": "seasonId",
+      "value": "your_season_id",
+      "type": "string"
+    },
+    {
+      "key": "locationId",
+      "value": "your_location_id",
+      "type": "string"
+    },
+    {
+      "key": "plantId",
+      "value": "your_plant_id",
+      "type": "string"
+    }
+  ]
+}

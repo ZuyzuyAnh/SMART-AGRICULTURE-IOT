@@ -171,6 +171,9 @@ client.on("message", async (topic, message) => {
         return;
       }
 
+      // Cập nhật last_seen khi nhận bất kỳ tin nhắn nào từ thiết bị
+      await deviceService.updateDeviceLastSeen(deviceId);
+
       // Cập nhật trạng thái thiết bị
       if (messageType === "status") {
         const statusData = JSON.parse(message.toString());

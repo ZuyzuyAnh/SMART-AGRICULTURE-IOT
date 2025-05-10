@@ -54,7 +54,7 @@ router.use(authenticate);
 router.get("/harvest-status", plantController.getPlantsByHarvestStatus);
 
 // Tạo cây trồng mới trong location và season
-router.post("/", plantController.createPlant);
+router.post("/", plantImageUpload.single("image"), plantController.createPlant);
 
 // Lấy tất cả cây trồng trong location
 router.get("/", plantController.getPlantsByLocation);

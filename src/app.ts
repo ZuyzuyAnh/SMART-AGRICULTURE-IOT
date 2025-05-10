@@ -17,8 +17,11 @@ import notificationRouter from "./routes/notification.routes";
 import carePlanRouter from "./routes/carePlan.routes";
 import seasonHistoryRouter from "./routes/seasonHistory.routes";
 import deviceRouter from "./routes/device.routes";
+import cameraRouter from "./routes/camera.routes";
+import { cameraUploadRouter } from "./handler/camera_upload";
 import { authenticate } from "./middleware/auth.middleware";
 import * as plantController from "./controllers/plant.controller";
+import schedulerService from "./services/scheduler.service";
 
 import "./services/mqtt.service";
 
@@ -48,9 +51,14 @@ app.use(
   express.static(path.join(__dirname, "../public/defaults"))
 );
 
+// Các router KHÔNG yêu cầu xác thực
 app.use("/", fileUploadRouter);
 app.use("/", predictRouter);
 app.use("/auth", authRouter);
+// Router xử lý upload ảnh từ ESP32-CAM (không cần xác thực)
+app.use("/", cameraUploadRouter);
+
+// Các router YÊU CẦU xác thực
 app.use("/api/seasons", seasonRouter);
 app.use("/api/seasons/:seasonId/locations", locationRouter);
 app.use("/api/seasons/:seasonId/locations/:locationId/plants", plantRouter); // Nested route for plants
@@ -63,6 +71,7 @@ app.use(
 );
 app.use("/api/season-histories", seasonHistoryRouter);
 app.use("/api/devices", deviceRouter);
+app.use("/api/camera", cameraRouter);
 app.use(
   "/api/plants/harvest-status",
   authenticate,
@@ -89,4 +98,6 @@ app.listen(port, () => {
   console.log(`Server started at http://localhost:${port}`);
   // Initialize model after server starts
   initModel();
+  // Khởi tạo scheduler service
+  schedulerService.initSchedulers();
 });
