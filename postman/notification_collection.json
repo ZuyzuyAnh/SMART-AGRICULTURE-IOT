@@ -1,0 +1,180 @@
+{
+  "info": {
+    "name": "Smart Agriculture - Notification APIs",
+    "description": "Collection các API quản lý thông báo",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Tạo thông báo mới",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"title\": \"Thông báo mới\",\n    \"content\": \"Nội dung thông báo\",\n    \"type\": \"SYSTEM\",\n    \"priority\": \"HIGH\",\n    \"recipients\": [\"all\"],\n    \"data\": {\n        \"key\": \"value\"\n    }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/notifications",
+          "host": ["{{base_url}}"],
+          "path": ["api", "notifications"]
+        },
+        "description": "Tạo một thông báo mới (chỉ admin)"
+      }
+    },
+    {
+      "name": "Lấy danh sách thông báo",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/notifications?page=1&limit=10&type=SYSTEM&isRead=false",
+          "host": ["{{base_url}}"],
+          "path": ["api", "notifications"],
+          "query": [
+            {
+              "key": "page",
+              "value": "1",
+              "description": "Số trang"
+            },
+            {
+              "key": "limit",
+              "value": "10",
+              "description": "Số lượng item mỗi trang"
+            },
+            {
+              "key": "type",
+              "value": "SYSTEM",
+              "description": "Loại thông báo (SYSTEM, ALERT, INFO)"
+            },
+            {
+              "key": "isRead",
+              "value": "false",
+              "description": "Trạng thái đã đọc (true/false)"
+            }
+          ]
+        },
+        "description": "Lấy danh sách thông báo của người dùng"
+      }
+    },
+    {
+      "name": "Đánh dấu thông báo đã đọc",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"isRead\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/notifications/{{notificationId}}/read",
+          "host": ["{{base_url}}"],
+          "path": ["api", "notifications", "{{notificationId}}", "read"]
+        },
+        "description": "Đánh dấu một thông báo đã đọc"
+      }
+    },
+    {
+      "name": "Đánh dấu tất cả thông báo đã đọc",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/notifications/read-all",
+          "host": ["{{base_url}}"],
+          "path": ["api", "notifications", "read-all"]
+        },
+        "description": "Đánh dấu tất cả thông báo đã đọc"
+      }
+    },
+    {
+      "name": "Xóa thông báo",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/notifications/{{notificationId}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "notifications", "{{notificationId}}"]
+        },
+        "description": "Xóa một thông báo"
+      }
+    },
+    {
+      "name": "Lấy số lượng thông báo chưa đọc",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/notifications/unread-count",
+          "host": ["{{base_url}}"],
+          "path": ["api", "notifications", "unread-count"]
+        },
+        "description": "Lấy số lượng thông báo chưa đọc"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "your_jwt_token",
+      "type": "string"
+    },
+    {
+      "key": "notificationId",
+      "value": "your_notification_id",
+      "type": "string"
+    }
+  ]
+}

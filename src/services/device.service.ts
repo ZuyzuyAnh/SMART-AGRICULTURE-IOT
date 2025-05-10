@@ -106,6 +106,7 @@ class DeviceService {
       const updateData: any = {
         status,
         last_active: new Date(),
+        last_seen: new Date(),
         updated_at: new Date(),
       };
 
@@ -186,6 +187,22 @@ class DeviceService {
       }
 
       return device;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Cập nhật thời gian thiết bị được nhìn thấy gần nhất
+  async updateDeviceLastSeen(deviceId: string): Promise<IDevice | null> {
+    try {
+      return await Device.findOneAndUpdate(
+        { deviceId },
+        {
+          last_seen: new Date(),
+          updated_at: new Date(),
+        },
+        { new: true }
+      );
     } catch (error) {
       throw error;
     }

@@ -7,11 +7,12 @@ export interface IDevice extends Document {
   locationId: mongoose.Types.ObjectId | null;
   status: string;
   last_active: Date;
+  last_seen: Date;
   battery_level: number;
   firmware_version: string;
   sensors: string[];
   settings: any;
-  registeredBy: mongoose.Types.ObjectId; // Thêm trường này
+  registeredBy: mongoose.Types.ObjectId;
   created_at: Date;
   updated_at: Date;
 }
@@ -31,11 +32,12 @@ const DeviceSchema: Schema = new Schema({
     default: "Không hoạt động",
   },
   last_active: { type: Date },
+  last_seen: { type: Date, default: Date.now },
   battery_level: { type: Number },
   firmware_version: { type: String },
   sensors: [{ type: String }],
   settings: { type: Schema.Types.Mixed, default: {} },
-  registeredBy: { type: Schema.Types.ObjectId, ref: "User", required: true }, // Thêm trường này
+  registeredBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
 });
@@ -43,6 +45,7 @@ const DeviceSchema: Schema = new Schema({
 // Index để tìm kiếm nhanh
 DeviceSchema.index({ deviceId: 1 });
 DeviceSchema.index({ locationId: 1 });
-DeviceSchema.index({ registeredBy: 1 }); // Thêm index này
+DeviceSchema.index({ registeredBy: 1 });
+DeviceSchema.index({ last_seen: 1 });
 
 export default mongoose.model<IDevice>("Device", DeviceSchema);

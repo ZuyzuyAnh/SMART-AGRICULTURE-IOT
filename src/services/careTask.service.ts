@@ -70,6 +70,7 @@ class CareTaskService {
       type?: string;
       scheduled_date?: Date;
       note?: string;
+      status?: string;
     }
   ): Promise<ICareTask | null> {
     try {

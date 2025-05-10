@@ -214,7 +214,7 @@ export const getCareTask = async (req: Request, res: Response) => {
 export const updateCareTask = async (req: Request, res: Response) => {
   try {
     const { plantId, taskId } = req.params;
-    const { name, type, scheduled_date, note } = req.body;
+    const { name, type, scheduled_date, note, status } = req.body;
     const userId = req.user?.id;
 
     if (!userId) {
@@ -261,6 +261,7 @@ export const updateCareTask = async (req: Request, res: Response) => {
     if (type) updateData.type = type;
     if (scheduled_date) updateData.scheduled_date = new Date(scheduled_date);
     if (note !== undefined) updateData.note = note;
+    if (status) updateData.status = status;
 
     const updatedTask = await careTaskService.updateCareTask(
       new mongoose.Types.ObjectId(taskId),

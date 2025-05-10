@@ -10,8 +10,7 @@ export const createPlant = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     const { locationId, seasonId } = req.params;
-    const { name, img, status, note, startdate, plantingDate, address } =
-      req.body;
+    const formData = req.body;
 
     if (!userId) {
       return res.status(401).json({
@@ -30,7 +29,7 @@ export const createPlant = async (req: Request, res: Response) => {
       });
     }
 
-    if (!name) {
+    if (!formData.name) {
       return res.status(400).json({
         success: false,
         message: "Plant name is required",
@@ -75,15 +74,27 @@ export const createPlant = async (req: Request, res: Response) => {
       });
     }
 
+    // Xử lý ảnh
+    let img = null;
+    if (req.file) {
+      // Nếu có ảnh được tải lên
+      img = `/uploads/plants/${req.file.filename}`;
+    } else if (formData.defaultImage) {
+      // Nếu chọn ảnh mặc định
+      img = `/defaults/plants/${formData.defaultImage}`;
+    }
+
     // Tạo cây trồng mới
     const plant = await plantService.createPlant({
-      name,
+      name: formData.name,
       img,
-      address,
-      status: status || "Đang tốt",
-      note,
-      startdate: startdate ? new Date(startdate) : new Date(),
-      plantingDate: plantingDate ? new Date(plantingDate) : null,
+      address: formData.address,
+      status: formData.status || "Đang tốt",
+      note: formData.note,
+      startdate: formData.startdate ? new Date(formData.startdate) : new Date(),
+      plantingDate: formData.plantingDate
+        ? new Date(formData.plantingDate)
+        : null,
       locationId: new mongoose.Types.ObjectId(locationId),
       seasonId: new mongoose.Types.ObjectId(seasonId),
     });
